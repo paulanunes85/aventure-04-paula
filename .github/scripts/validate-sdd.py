@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
-"""Valida os pacotes SDD em .spec/ e a rastreabilidade com as fontes.
+"""Validate the SDD packages under .spec/ and their source traceability.
 
-Contrato: .github/instructions/sdd-artifacts.instructions.md.
-Somente leitura. Validacao textual nao prova semantica EARS, aprovacao
-humana, renderizacao de diagramas nem resultado de testes.
-A cobertura dos IDs da fonte e o indice .spec/README.md sao verificados
-sobre todos os pacotes, mesmo com --package.
+Contract: .github/instructions/sdd-artifacts.instructions.md. Artifact
+vocabulary (section titles, `origem:`, `deve`, `Depende de:`) follows the
+pt-BR templates of the sdd-requirements-engineer skill.
 
-Saida: 0 sem erros; 1 com erros (ou avisos com --strict); 2 quando
-nenhum pacote e encontrado (recusa aprovacao vazia).
+Read-only. Textual validation does not prove EARS semantics, human
+approval, diagram rendering or test results. Source-ID coverage and the
+.spec/README.md index are checked across all packages, even with
+--package.
+
+Exit codes: 0 no errors; 1 errors (or warnings with --strict); 2 no
+package found (refuses a vacuous pass).
 """
 
 from __future__ import annotations
@@ -24,6 +27,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 SPEC_DIR = ".spec"
 INDEX = "README.md"
+CODEMAP = "CODEMAP.md"
 FORBIDDEN_DIRS = ("specs", ".specs")
 PACKAGE = re.compile(r"^\d{3}-[a-z0-9]+(?:-[a-z0-9]+)*$")
 SOURCE_ID_DEFAULT = r"\b(?:RF|RNF|RN)-\d+\b"
@@ -185,7 +189,7 @@ EARS_PATTERNS = (
     "estado", "opcional", "indesejado", "complexo",
 )
 
-H2 = re.compile(r"^##[ \t]+([^\n]*\S)", re.M)
+H2 = re.compile(r"^##[ \t]+(\S[^\n]*)", re.M)
 FENCE = re.compile(r"^(```|~~~).*?^\1", re.M | re.S)
 REQ_HEAD = re.compile(r"^###\s+((?:REQ|NFR)-\d{3})\s*:", re.M)
 NEXT_HEAD = re.compile(r"^#{2,3}\s", re.M)
@@ -228,6 +232,8 @@ PALETTE = (
     "classDef external fill:#E8E8E8,stroke:#555555,color:#222222",
 )
 GRAPHLIKE = ("flowchart", "graph", "classDiagram")
+ERROR = "ERROR"
+WARNING = "WARNING"
 
 
 @dataclass
@@ -251,10 +257,10 @@ class Report:
         self.items.append(Finding(level, code, shown, msg))
 
     def error(self, code: str, path: Path, msg: str) -> None:
-        self.add("ERRO", code, path, msg)
+        self.add(ERROR, code, path, msg)
 
     def warn(self, code: str, path: Path, msg: str) -> None:
-        self.add("AVISO", code, path, msg)
+        self.add(WARNING, code, path, msg)
 
 
 @dataclass
@@ -268,8 +274,9 @@ class Package:
 
 def normalize(heading: str) -> str:
     text = unicodedata.normalize("NFC", heading).replace("`", "")
-    text = re.sub(r"^\d+(?:\.\d+)*\.?\s+", "", text)
-    text = re.sub(r"\s*\([^()]*\)$", "", text.strip())
+    text = re.sub(r"^\d+(?:\.\d+)*\.?\s+", "", text).strip()
+    if text.endswith(")") and "(" in text:
+        text = text[:text.rfind("(")]
     return text.strip().casefold()
 
 
@@ -318,17 +325,18 @@ def check_sections(rep: Report, path: Path, text: str) -> None:
     found = sections(text)
     for names in SECTIONS[path.name]:
         body = next((found[n] for n in names if n in found), None)
-        label = " ou ".join(f"`## {n}`" for n in names)
+        label = " or ".join(f"`## {n}`" for n in names)
         if body is None:
-            rep.error("SEC-001", path, f"seção ausente: {label}")
+            rep.error("SEC-001", path, f"missing section: {label}")
         elif not body.strip():
             rep.error("SEC-002", path,
-                      f"seção vazia: {label}; use NÃO APLICÁVEL: <motivo>")
+                      f"empty section: {label}; write NÃO APLICÁVEL: "
+                      "<motivo>")
         elif re.fullmatch(r"\s*N[ÃA]O APLIC[ÁA]VEL\.?\s*", body):
             rep.error("SEC-003", path,
-                      f"{label}: NÃO APLICÁVEL sem motivo")
+                      f"{label}: NÃO APLICÁVEL without a reason")
     if path.name == TASKS and not any(k.startswith("fase") for k in found):
-        rep.error("SEC-001", path, "nenhuma seção `## Fase N`")
+        rep.error("SEC-001", path, "no `## Fase N` section")
 
 
 def line_count(path: Path) -> int:
@@ -358,11 +366,11 @@ def check_range(rep: Report, root: Path, path: Path, number: int,
     shown = shown_path(root, target)
     if start < 1 or end < start:
         rep.error("ANC-003", path,
-                  f"L{number}: intervalo inválido {shown}#L{start}-L{end}")
+                  f"L{number}: invalid range {shown}#L{start}-L{end}")
     elif end > size:
         rep.error("ANC-004", path,
-                  f"L{number}: {shown}#L{end} além do fim do arquivo "
-                  f"({size} linhas)")
+                  f"L{number}: {shown}#L{end} is past the end of the "
+                  f"file ({size} lines)")
 
 
 def check_anchors(rep: Report, root: Path, path: Path, text: str,
@@ -376,11 +384,11 @@ def check_anchors(rep: Report, root: Path, path: Path, text: str,
                 current = resolve(root, path.parent, token)
             if token and current is None:
                 rep.error("ANC-001", path,
-                          f"L{number}: arquivo citado não existe: {token}")
+                          f"L{number}: cited file does not exist: {token}")
             elif current is None:
                 rep.warn("ANC-002", path,
-                         f"L{number}: âncora #L{match.group('a')} sem "
-                         "documento de origem identificável")
+                         f"L{number}: anchor #L{match.group('a')} has no "
+                         "identifiable source document")
             else:
                 check_range(rep, root, path, number, current, match,
                             lengths)
@@ -417,61 +425,63 @@ def check_origem(rep: Report, spec: Path, rid: str, block: str,
     origem = ORIGEM.search("\n".join(block.splitlines()[:21]))
     if origem is None:
         rep.error("REQ-001", spec,
-                  f"{rid}: sem linha `origem:` até 20 linhas após o título")
+                  f"{rid}: no `origem:` line within 20 lines of the "
+                  "heading")
         return
     value = origem.group(1)
     cited = set(SRC_ID.findall(value))
     greenfield = re.search(r"\[GREENFIELD\]\s*\S", value)
     if not cited and not PATH_TOKEN.search(value) and not greenfield:
         rep.error("REQ-002", spec,
-                  f"{rid}: `origem:` sem SRC-###, caminho ou "
-                  "[GREENFIELD] justificado")
+                  f"{rid}: `origem:` needs SRC-###, a file path or a "
+                  "justified [GREENFIELD]")
     for src in sorted(cited - (sources or cited)):
         rep.error("SRC-001", spec,
-                  f"{rid}: {src} não está no registro de fontes de "
+                  f"{rid}: {src} is not in the source register of "
                   f"{TRACEABILITY}")
 
 
 def check_metadata(rep: Report, spec: Path, rid: str, block: str) -> None:
     pattern = field_value(block, "Padrão")
     if pattern is None:
-        rep.error("REQ-003", spec, f"{rid}: sem `- Padrão:`")
+        rep.error("REQ-003", spec, f"{rid}: no `- Padrão:` field")
     elif not any(fold(pattern).startswith(p) for p in EARS_PATTERNS):
         rep.error("REQ-003", spec,
-                  f"{rid}: padrão EARS desconhecido: {pattern}")
+                  f"{rid}: unknown EARS pattern: {pattern}")
     priority = field_value(block, "Prioridade")
     if priority is None or not re.match(r"P[0-3]\b", priority):
-        rep.error("REQ-004", spec, f"{rid}: prioridade P0-P3 ausente")
+        rep.error("REQ-004", spec, f"{rid}: missing P0-P3 priority")
     if field_value(block, "Status") is None:
-        rep.error("REQ-005", spec, f"{rid}: sem `- Status:`")
+        rep.error("REQ-005", spec, f"{rid}: no `- Status:` field")
 
 
 def check_statement(rep: Report, spec: Path, rid: str, block: str) -> None:
     statements = EARS_LINE.findall(block)
     if not statements:
         rep.error("REQ-006", spec,
-                  f"{rid}: sem declaração EARS (`> ... deve ...`)")
+                  f"{rid}: no EARS statement (`> ... deve ...`)")
     elif len(statements) > 1:
         rep.warn("REQ-006", spec,
-                 f"{rid}: mais de uma declaração EARS no bloco")
+                 f"{rid}: more than one EARS statement in the block")
     has_ac = re.search(rf"\bAC-{rid}-\d{{2}}\b", block)
     if not has_ac and "BLOQUEADO" in block:
         rep.warn("REQ-007", spec,
-                 f"{rid}: aceite BLOQUEADO; não entra no handoff")
+                 f"{rid}: acceptance BLOQUEADO; excluded from handoff")
     elif not has_ac:
-        rep.error("REQ-007", spec, f"{rid}: sem AC-{rid}-NN")
+        rep.error("REQ-007", spec, f"{rid}: no AC-{rid}-NN")
     if "**Verificação**" not in block:
-        rep.error("REQ-008", spec, f"{rid}: sem bloco **Verificação**")
+        rep.error("REQ-008", spec, f"{rid}: no **Verificação** block")
     if rid.startswith("NFR-") and NFRD not in block:
         rep.warn("REQ-009", spec,
-                 f"{rid}: não aponta o envelope de medição em {NFRD}")
+                 f"{rid}: does not point to its measurement envelope in "
+                 f"{NFRD}")
 
 
 def check_specification(rep: Report, pkg: Package) -> None:
     spec = pkg.path / SPECIFICATION
     text = pkg.texts[SPECIFICATION]
     if not re.search(r"^- Constituição:", header(text), re.M):
-        rep.warn("SPC-002", spec, "cabeçalho sem `- Constituição:`")
+        rep.warn("SPC-002", spec, "header has no `- Constituição:` line")
     trace = pkg.texts.get(TRACEABILITY) if TRACEABILITY in pkg.produced \
         else None
     sources = None
@@ -480,13 +490,13 @@ def check_specification(rep: Report, pkg: Package) -> None:
         sources = set(SRC_ROW.findall(registry))
         if not sources:
             rep.error("SRC-002", pkg.path / TRACEABILITY,
-                      "registro de fontes sem SRC-###")
+                      "source register has no SRC-### row")
     blocks = requirement_blocks(text)
     if not blocks:
-        rep.error("REQ-000", spec, "nenhum REQ-NNN/NFR-NNN declarado")
+        rep.error("REQ-000", spec, "no REQ-NNN/NFR-NNN declared")
     headings = REQ_HEAD.findall(text)
     for rid in sorted({h for h in headings if headings.count(h) > 1}):
-        rep.error("REQ-010", spec, f"{rid}: ID duplicado")
+        rep.error("REQ-010", spec, f"{rid}: duplicate ID")
     for rid, block in blocks.items():
         check_origem(rep, spec, rid, block, sources)
         check_metadata(rep, spec, rid, block)
@@ -494,10 +504,10 @@ def check_specification(rep: Report, pkg: Package) -> None:
     cited = set(SRC_ID.findall("\n".join(ORIGEM.findall(text))))
     for src in sorted((sources or set()) - cited):
         rep.warn("SRC-003", pkg.path / TRACEABILITY,
-                 f"{src} não é citado em nenhum origem:")
+                 f"{src} is not cited by any origem: line")
     if not pkg.docs:
         rep.warn("FON-001", spec,
-                 "nenhum documento de origem fora de .github/ citado")
+                 "no source document outside .github/ is cited")
 
 
 def check_coverage(rep: Report, path: Path, text: str, active: set[str],
@@ -505,17 +515,19 @@ def check_coverage(rep: Report, path: Path, text: str, active: set[str],
     wanted = {i for i in active if i.startswith(prefix)}
     present = {i for i in REQ_ID.findall(text) if i.startswith(prefix)}
     for rid in sorted(wanted - present):
-        rep.error("XRF-001", path, f"{rid} de {SPECIFICATION} ausente")
+        rep.error("XRF-001", path, f"{rid} from {SPECIFICATION} is "
+                  "missing")
     for rid in sorted(present - active):
-        rep.error("XRF-002", path, f"{rid} não existe em {SPECIFICATION}")
+        rep.error("XRF-002", path, f"{rid} does not exist in "
+                  f"{SPECIFICATION}")
 
 
 def check_no_ears(rep: Report, path: Path, text: str) -> None:
     for number, line in enumerate(text.splitlines(), start=1):
         if EARS_LINE.match(line):
             rep.error("XRF-003", path,
-                      f"L{number}: declaração EARS copiada; referencie o "
-                      f"ID de {SPECIFICATION}")
+                      f"L{number}: copied EARS statement; reference the "
+                      f"ID in {SPECIFICATION} instead")
 
 
 def check_tdd(rep: Report, pkg: Package) -> None:
@@ -523,7 +535,7 @@ def check_tdd(rep: Report, pkg: Package) -> None:
     spec = pkg.texts.get(SPECIFICATION, "")
     for ac in sorted(set(AC_ID.findall(spec)) - set(AC_ID.findall(text))):
         rep.error("XRF-005", pkg.path / TDD,
-                  f"{ac} sem ciclo RED/GREEN planejado")
+                  f"{ac} has no planned RED/GREEN cycle")
 
 
 def find_cycle(graph: dict[str, set[str]]) -> list[str] | None:
@@ -558,20 +570,20 @@ def task_graph(rep: Report, path: Path, tasks: list[re.Match[str]],
     for task in tasks:
         tid, meta, body = task.group("id", "meta", "body")
         if "[S]" not in meta and "[P]" not in meta:
-            rep.error("TSK-002", path, f"{tid}: sem marcador [S] ou [P]")
+            rep.error("TSK-002", path, f"{tid}: no [S] or [P] marker")
         refs = set(REQ_ID.findall(meta + body))
         if not refs:
-            rep.warn("TSK-003", path, f"{tid}: não rastreia REQ/NFR")
+            rep.warn("TSK-003", path, f"{tid}: traces no REQ/NFR")
         for rid in sorted(refs - active):
-            rep.error("TSK-004", path, f"{tid}: {rid} não existe")
+            rep.error("TSK-004", path, f"{tid}: {rid} does not exist")
         traced |= refs
         deps = {d for v in DEPENDS.findall(body) for d in TASK_ID.findall(v)}
         for dep in sorted(deps - known):
             rep.error("TSK-005", path,
-                      f"{tid}: depende de {dep} inexistente")
+                      f"{tid}: depends on unknown task {dep}")
         graph[tid] = deps & known
     for rid in sorted(active - traced):
-        rep.error("TSK-006", path, f"{rid} sem tarefa")
+        rep.error("TSK-006", path, f"{rid} has no task")
     return graph, known
 
 
@@ -582,17 +594,18 @@ def check_ledger(rep: Report, path: Path, text: str,
     marked = set(TASK_ID.findall(ledger.group(1))) if ledger else set()
     for tid in sorted(done - marked):
         rep.error("TSK-008", path,
-                  f"{tid} marcada [x] sem entrada no registro datado")
+                  f"{tid} is checked [x] without a dated ledger entry")
     for tid in sorted(marked - done):
-        rep.error("TSK-008", path, f"{tid} no registro, mas desmarcada")
+        rep.error("TSK-008", path, f"{tid} is in the ledger but unchecked")
     count = COUNT.search(text)
     expected = (len(done), len(tasks))
     if count is None:
-        rep.error("TSK-009", path, "sem `Tarefas concluídas: **N de M**`")
+        rep.error("TSK-009", path,
+                  "no `Tarefas concluídas: **N de M**` line")
     elif (int(count.group(1)), int(count.group(2))) != expected:
         rep.error("TSK-009", path,
-                  f"contagem {count.group(1)} de {count.group(2)} "
-                  f"diverge de {expected[0]} de {expected[1]}")
+                  f"count {count.group(1)} de {count.group(2)} does not "
+                  f"match {expected[0]} de {expected[1]}")
 
 
 def check_tasks(rep: Report, pkg: Package) -> set[str]:
@@ -600,19 +613,19 @@ def check_tasks(rep: Report, pkg: Package) -> set[str]:
     text = pkg.texts[TASKS]
     tasks = list(TASK.finditer(text))
     if not tasks:
-        rep.error("TSK-000", path, "nenhuma tarefa `- [ ] **T001 ...**`")
+        rep.error("TSK-000", path, "no task `- [ ] **T001 ...**`")
         return set()
     ids = [t.group("id") for t in tasks]
     for tid in sorted({i for i in ids if ids.count(i) > 1}):
-        rep.error("TSK-001", path, f"{tid}: ID de tarefa duplicado")
+        rep.error("TSK-001", path, f"{tid}: duplicate task ID")
     graph, known = task_graph(rep, path, tasks, pkg.active)
     cycle = find_cycle(graph)
     if cycle:
-        rep.error("TSK-007", path, f"ciclo: {' -> '.join(cycle)}")
+        rep.error("TSK-007", path, f"cycle: {' -> '.join(cycle)}")
     check_ledger(rep, path, text, tasks)
     graph_text = raw_section(text, "Grafo de dependências")
     for tid in sorted(known - set(TASK_ID.findall(graph_text))):
-        rep.error("TSK-010", path, f"{tid} ausente do grafo")
+        rep.error("TSK-010", path, f"{tid} is missing from the graph")
     return known
 
 
@@ -621,9 +634,9 @@ def check_mermaid(rep: Report, path: Path) -> None:
     for index, match in enumerate(MERMAID.finditer(text), start=1):
         lines = [ln.strip() for ln in match.group(1).splitlines()
                  if ln.strip()]
-        label = f"bloco Mermaid {index}"
+        label = f"Mermaid block {index}"
         if not lines or lines[0] != THEME:
-            rep.error("MMD-001", path, f"{label}: sem diretiva de tema")
+            rep.error("MMD-001", path, f"{label}: missing theme directive")
             continue
         check_palette(rep, path, label, lines[1:])
 
@@ -636,15 +649,15 @@ def check_palette(rep: Report, path: Path, label: str,
         for entry in PALETTE:
             if lines.count(entry) != 1:
                 rep.error("MMD-002", path,
-                          f"{label}: `{entry.split()[1]}` deve aparecer "
-                          "uma vez")
+                          f"{label}: `{entry.split()[1]}` must appear "
+                          "exactly once")
     elif "classDef" in body:
         rep.error("MMD-003", path,
-                  f"{label}: {kind} não deve conter classDef")
+                  f"{label}: {kind} must not contain classDef")
     for value in HEX.findall(body):
         full = "".join(c * 2 for c in value) if len(value) == 3 else value
         if len({full[0:2], full[2:4], full[4:6]}) != 1:
-            rep.error("MMD-004", path, f"{label}: cor cromática #{value}")
+            rep.error("MMD-004", path, f"{label}: chromatic color #{value}")
 
 
 def check_links(rep: Report, path: Path) -> None:
@@ -654,7 +667,7 @@ def check_links(rep: Report, path: Path) -> None:
             continue
         local = target.split("#", 1)[0]
         if local and not (path.parent / local).exists():
-            rep.error("LNK-001", path, f"link quebrado: {target}")
+            rep.error("LNK-001", path, f"broken link: {target}")
 
 
 def check_evidence_refs(rep: Report, pkg: Package) -> None:
@@ -662,7 +675,7 @@ def check_evidence_refs(rep: Report, pkg: Package) -> None:
         for token in sorted(set(EVIDENCE_PATH.findall(pkg.texts[name]))):
             if not (pkg.path / token).is_file():
                 rep.error("EVD-001", pkg.path / name,
-                          f"evidência citada não existe: {token}")
+                          f"cited evidence does not exist: {token}")
 
 
 def reached(produced: set[str]) -> int:
@@ -679,31 +692,31 @@ def check_files(rep: Report, path: Path, texts: dict[str, str]) -> None:
     for name in LEGACY:
         if name in names:
             rep.error("PKG-007", path / name,
-                      "nome fora do padrão; use os arquivos em "
-                      "MAIÚSCULAS do pacote")
+                      "non-standard file name; use the package's "
+                      "UPPERCASE files")
     for name in FILES:
         if name not in texts:
-            rep.error("PKG-002", path / name, "arquivo obrigatório ausente")
+            rep.error("PKG-002", path / name, "required file is missing")
     for folder in FOLDERS:
         if INDEX not in entries(path / folder):
             rep.error("PKG-006", path / folder / INDEX,
-                      f"pasta {folder}/ sem índice {INDEX}")
+                      f"folder {folder}/ has no {INDEX} index")
     extras = {n for n in names if n.endswith(".md")} - set(FILES) \
         - set(LEGACY)
     for name in sorted(extras):
-        rep.warn("PKG-008", path / name, "arquivo fora da estrutura")
+        rep.warn("PKG-008", path / name, "file outside the package "
+                 "structure")
 
 
 def stub_finding(level: int, top: int, require_full: bool
                  ) -> tuple[str, str, str]:
     if level == 0:
-        return "ERRO", "STG-001", "arquivo da etapa de requisitos não " \
-            "iniciado"
+        return ERROR, "STG-001", "requirements-stage file not started"
     if level < top:
-        return "ERRO", "STG-003", "não iniciado, mas uma etapa " \
-            "posterior já foi produzida"
-    return ("ERRO" if require_full else "AVISO"), "PKG-003", \
-        "etapa ainda não produzida"
+        return ERROR, "STG-003", "not started, but a later stage was " \
+            "already produced"
+    return (ERROR if require_full else WARNING), "PKG-003", \
+        "stage not produced yet"
 
 
 def check_stages(rep: Report, path: Path, require_full: bool,
@@ -717,10 +730,10 @@ def check_stages(rep: Report, path: Path, require_full: bool,
     for name, level in CHECKPOINTS.items():
         if top >= level and name not in entries(path / "checkpoints"):
             rep.error("CKP-001", path / "checkpoints" / name,
-                      "checkpoint ausente para a etapa produzida")
+                      "checkpoint missing for a produced stage")
     if top >= 1 and "manifest.yaml" not in entries(path / "contracts"):
         rep.error("CTR-001", path / "contracts" / "manifest.yaml",
-                  "manifesto de contratos ausente")
+                  "contracts manifest is missing")
 
 
 def check_checkpoints(rep: Report, pkg: Package,
@@ -739,9 +752,10 @@ def check_checkpoints(rep: Report, pkg: Package,
         feature = FEATURE_ID.search(text)
         if feature is None or feature.group(1) != number:
             rep.error("CKP-002", path,
-                      f"`feature.id` deve ser \"{number}\"")
+                      f"`feature.id` must be \"{number}\"")
         for item in sorted(ids - set(pattern.findall(text))):
-            rep.error("CKP-003", path, f"{item} ausente do checkpoint")
+            rep.error("CKP-003", path, f"{item} is missing from the "
+                      "checkpoint")
 
 
 def load_package(root: Path, path: Path) -> Package:
@@ -763,7 +777,7 @@ def check_content(rep: Report, pkg: Package) -> None:
     for name, text in pkg.texts.items():
         if file_status(text) is None:
             rep.error("SPC-001", pkg.path / name,
-                      "cabeçalho sem `- Status:` válido "
+                      "header has no valid `- Status:` "
                       f"({', '.join(FILE_STATUS)})")
     if SPECIFICATION in pkg.produced:
         check_specification(rep, pkg)
@@ -802,14 +816,14 @@ def check_repository(rep: Report, root: Path) -> None:
     for name in FORBIDDEN_DIRS:
         if (root / name).is_dir():
             rep.error("PKG-001", root / name,
-                      f"especificações fora de {SPEC_DIR}/; mova para "
-                      f"{SPEC_DIR}/<NNN>-<funcionalidade>/")
+                      f"specifications outside {SPEC_DIR}/; move them to "
+                      f"{SPEC_DIR}/<NNN>-<feature>/")
     constitution = root / "CONSTITUTION.md"
     if not constitution.is_file():
         rep.error("CON-001", constitution,
-                  "CONSTITUTION.md ausente; /write-ears-spec cria em "
-                  "Rascunho")
-    extra = [constitution, root / "CODEMAP.md"]
+                  "CONSTITUTION.md is missing; /write-ears-spec creates it "
+                  "as Rascunho")
+    extra = [constitution, root / CODEMAP]
     extra += sorted((root / "docs" / "adr").glob("*.md"))
     for path in extra:
         if path.is_file():
@@ -821,12 +835,12 @@ def check_index(rep: Report, root: Path, found: list[Path]) -> None:
     numbers = [p.name[:3] for p in found]
     for number in sorted({n for n in numbers if numbers.count(n) > 1}):
         rep.error("PKG-005", root / SPEC_DIR,
-                  f"número de pacote {number} repetido")
+                  f"package number {number} is repeated")
     if not found:
         return
     if not index.is_file():
         rep.error("IDX-001", index,
-                  "índice de funcionalidades ausente; liste todo pacote")
+                  "feature index is missing; list every package")
         return
     check_mermaid(rep, index)
     check_links(rep, index)
@@ -834,10 +848,12 @@ def check_index(rep: Report, root: Path, found: list[Path]) -> None:
     listed = set(re.findall(r"\b\d{3}-[a-z0-9]+(?:-[a-z0-9]+)*", text))
     names = {p.name for p in found}
     for name in sorted(names - listed):
-        rep.error("IDX-002", index, f"pacote {name} ausente do índice")
+        rep.error("IDX-002", index, f"package {name} is missing from "
+                  "the index")
     for name in sorted(listed - names):
         rep.error("IDX-003", index,
-                  f"{name} citado no índice, mas não existe em {SPEC_DIR}/")
+                  f"{name} is listed in the index but does not exist in "
+                  f"{SPEC_DIR}/")
 
 
 def check_source_coverage(rep: Report, root: Path, pkgs: list[Package],
@@ -854,8 +870,8 @@ def check_source_coverage(rep: Report, root: Path, pkgs: list[Package],
         for sid in sorted(ids):
             if not re.search(rf"\b{re.escape(sid)}\b", joined):
                 rep.error("FON-002", doc,
-                          f"{sid} sem requisito nem disposição em nenhum "
-                          f"pacote de {SPEC_DIR}/ (fonte: {shown})")
+                          f"{sid} has no requirement or disposition in any "
+                          f"{SPEC_DIR}/ package (source: {shown})")
 
 
 def packages(root: Path, selected: str | None) -> list[Path]:
@@ -884,9 +900,9 @@ def validate(root: Path, selected: str | None, require_full: bool,
         else:
             loaded.append(load_package(root, path))
     if any(reached(p.produced) >= 1 for p in loaded) and \
-            not (root / "CODEMAP.md").is_file():
-        rep.error("CMP-001", root / "CODEMAP.md",
-                  "CODEMAP.md ausente com design produzido")
+            not (root / CODEMAP).is_file():
+        rep.error("CMP-001", root / CODEMAP,
+                  "CODEMAP.md is missing although design was produced")
     check_source_coverage(rep, root, loaded, re.compile(source_pattern))
     return rep, len(chosen)
 
@@ -894,20 +910,20 @@ def validate(root: Path, selected: str | None, require_full: bool,
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--root", type=Path, default=ROOT)
-    parser.add_argument("--package", help="ex.: 001 ou 001-sala-do-eco")
+    parser.add_argument("--package", help="e.g. 001 or 001-my-feature")
     parser.add_argument("--require-full", action="store_true",
-                        help="exige todas as etapas produzidas")
+                        help="require every stage to be produced")
     parser.add_argument("--strict", action="store_true",
-                        help="trata avisos como erros")
+                        help="treat warnings as errors")
     parser.add_argument("--source-id-pattern", default=SOURCE_ID_DEFAULT,
-                        help="regex dos IDs no documento de origem")
+                        help="regex of the IDs in the source document")
     parser.add_argument("--format", choices=("text", "json"),
                         default="text")
     args = parser.parse_args(argv)
     rep, count = validate(args.root.resolve(), args.package,
                           args.require_full, args.source_id_pattern)
-    errors = [f for f in rep.items if f.level == "ERRO"]
-    warnings = [f for f in rep.items if f.level == "AVISO"]
+    errors = [f for f in rep.items if f.level == ERROR]
+    warnings = [f for f in rep.items if f.level == WARNING]
     if args.format == "json":
         print(json.dumps({"packages": count,
                           "findings": [asdict(f) for f in rep.items]},
@@ -916,11 +932,11 @@ def main(argv: list[str] | None = None) -> int:
         for item in rep.items:
             print(f"{item.level} [{item.code}] {item.path}: "
                   f"{item.message}")
-        print(f"{count} pacote(s) em {SPEC_DIR}/, {len(errors)} erro(s), "
-              f"{len(warnings)} aviso(s).")
+        print(f"{count} package(s) in {SPEC_DIR}/, {len(errors)} "
+              f"error(s), {len(warnings)} warning(s).")
     if count == 0:
-        print(f"nenhum pacote em {SPEC_DIR}/<NNN>-<funcionalidade>/; "
-              "recusando aprovação vazia", file=sys.stderr)
+        print(f"no package in {SPEC_DIR}/<NNN>-<feature>/; "
+              "refusing a vacuous pass", file=sys.stderr)
         return 2
     if errors or (args.strict and warnings):
         return 1

@@ -1,4 +1,8 @@
-"""Testes do validador SDD nativo (.github/scripts/validate-sdd.py)."""
+"""Tests for the SDD package validator (.github/scripts/validate-sdd.py).
+
+Fixtures are written in pt-BR because they mirror the artifact templates.
+Run: python3 -B -m unittest discover -s .github/scripts -p 'test_*.py'
+"""
 
 import importlib.util
 import io
