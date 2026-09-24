@@ -1,0 +1,14 @@
+{
+    "version": 1,
+    "hooks": {
+        "sessionStart": [
+            {
+                "type": "command",
+                "bash": "python3 .github/hooks/scripts/hook.py session-start",
+                "powershell": "python .github/hooks/scripts/hook.py session-start",
+                "cwd": ".",
+                "timeoutSec": 10
+            }
+        ]
+    }
+}

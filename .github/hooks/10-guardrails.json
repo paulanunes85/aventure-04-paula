@@ -1,0 +1,14 @@
+{
+    "version": 1,
+    "hooks": {
+        "preToolUse": [
+            {
+                "type": "command",
+                "bash": "python3 .github/hooks/scripts/hook.py pre-tool-use",
+                "powershell": "python .github/hooks/scripts/hook.py pre-tool-use",
+                "cwd": ".",
+                "timeoutSec": 10
+            }
+        ]
+    }
+}

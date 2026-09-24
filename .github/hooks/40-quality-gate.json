@@ -1,0 +1,14 @@
+{
+    "version": 1,
+    "hooks": {
+        "agentStop": [
+            {
+                "type": "command",
+                "bash": "python3 .github/hooks/scripts/hook.py agent-stop",
+                "powershell": "python .github/hooks/scripts/hook.py agent-stop",
+                "cwd": ".",
+                "timeoutSec": 300
+            }
+        ]
+    }
+}

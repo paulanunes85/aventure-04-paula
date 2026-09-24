@@ -1,0 +1,81 @@
+{
+    "protected_paths": {
+        "deny": [
+            "**/.git/**"
+        ],
+        "ask": [
+            ".github/hooks/**",
+            ".github/workflows/**"
+        ]
+    },
+    "secret_paths": {
+        "patterns": [
+            ".env",
+            ".env.*",
+            "*.pem",
+            "*.key",
+            "*.pfx",
+            "*.p12",
+            "id_rsa*",
+            "id_ecdsa*",
+            "id_ed25519*",
+            ".npmrc",
+            ".pypirc",
+            ".netrc",
+            "*.tfstate",
+            "*.tfstate.*",
+            "**/secrets/**"
+        ],
+        "exceptions": [
+            ".env.example",
+            ".env.sample",
+            ".env.template",
+            "*.pub"
+        ]
+    },
+    "outside_workspace_write": "ask",
+    "shell": {
+        "deny": [
+            "\\brm\\s+(?:-\\S+\\s+)*(?:--\\s+)?(?:/|~|\\$HOME|\\$\\{HOME\\})(?:/\\*?)?(?=\\s|$|[;&|])",
+            "\\bmkfs(?:\\.\\w+)?\\b",
+            "\\bdd\\b[^\\n;|&]*\\bof=/dev/(?!null\\b)",
+            ":\\(\\)\\s*\\{\\s*:\\s*\\|\\s*:\\s*&\\s*\\}\\s*;\\s*:",
+            "\\b(?:curl|wget)\\b[^\\n;|]*\\|\\s*(?:sudo\\s+)?(?:ba|z|da|k)?sh\\b",
+            ">\\s*/dev/(?:sd|nvme|disk)\\w*"
+        ],
+        "ask": [
+            "\\brm\\s+-\\w*(?:r\\w*f|f\\w*r)",
+            "\\bgit\\s+push\\b",
+            "\\bgit\\s+reset\\s+--hard\\b",
+            "\\bgit\\s+clean\\s+-\\w*f",
+            "\\bgit\\s+branch\\s+-D\\b",
+            "\\bgit\\s+(?:checkout|restore)\\s+(?:--\\s+)?\\.(?=\\s|$)",
+            "--no-verify\\b",
+            "\\bsudo\\b",
+            "\\b(?:npm|pnpm|yarn)\\s+publish\\b",
+            "\\b(?:terraform|tofu)\\s+(?:apply|destroy)\\b",
+            "\\bkubectl\\s+delete\\b",
+            "\\baz\\s+group\\s+delete\\b",
+            "(?i)\\bdrop\\s+(?:table|database|schema)\\b"
+        ]
+    },
+    "audit": {
+        "enabled": true,
+        "max_bytes": 5000000
+    },
+    "session_context": {
+        "enabled": true,
+        "extra": [
+            "Siga .github/copilot-instructions.md e .github/instructions/.",
+            "Nenhum código sem requisito aprovado em specs/<NNN>-*/spec.md.",
+            "Testes que verificam requisitos citam o REQ-ID em comentário.",
+            "Nunca registre segredos, credenciais ou dados pessoais."
+        ]
+    },
+    "quality_gate": {
+        "enabled": false,
+        "commands": [],
+        "timeout_sec": 240,
+        "max_blocks": 2
+    }
+}

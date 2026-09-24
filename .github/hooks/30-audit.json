@@ -1,0 +1,32 @@
+{
+    "version": 1,
+    "hooks": {
+        "postToolUse": [
+            {
+                "type": "command",
+                "bash": "python3 .github/hooks/scripts/hook.py post-tool-use",
+                "powershell": "python .github/hooks/scripts/hook.py post-tool-use",
+                "cwd": ".",
+                "timeoutSec": 10
+            }
+        ],
+        "postToolUseFailure": [
+            {
+                "type": "command",
+                "bash": "python3 .github/hooks/scripts/hook.py post-tool-use-failure",
+                "powershell": "python .github/hooks/scripts/hook.py post-tool-use-failure",
+                "cwd": ".",
+                "timeoutSec": 10
+            }
+        ],
+        "sessionEnd": [
+            {
+                "type": "command",
+                "bash": "python3 .github/hooks/scripts/hook.py session-end",
+                "powershell": "python .github/hooks/scripts/hook.py session-end",
+                "cwd": ".",
+                "timeoutSec": 10
+            }
+        ]
+    }
+}
