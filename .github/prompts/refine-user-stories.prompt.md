@@ -9,7 +9,7 @@ tools: ["read", "search", "edit"]
 
 ## Objetivo
 
-Transformar o documento de requisitos de origem (ou um épico dele) em histórias de usuário verticais, INVEST, com critérios de aceite Dado/Quando/Então e perguntas em aberto explícitas. Histórias expressam intenção; elas não substituem os requisitos EARS de `spec.md`.
+Transformar o documento de requisitos de origem (ou um épico dele) em histórias de usuário verticais, INVEST, com critérios de aceite Dado/Quando/Então e perguntas em aberto explícitas. Histórias expressam intenção; elas não substituem os requisitos EARS de `SPECIFICATION.md`.
 
 ## Quando invocar
 
@@ -45,7 +45,7 @@ Na Etapa 1 (descoberta), antes de `/write-ears-spec`, quando o insumo é prosa i
 - Inventar persona, regra, valor, prioridade ou estimativa ausente da fonte
 - Resolver ambiguidade escolhendo uma interpretação em silêncio
 - Dividir horizontalmente (história de backend + história de UI) ou escrever histórias como tarefas técnicas
-- Criar `spec.md`, `plan.md`, `tasks.md`, código ou testes
+- Criar ou editar arquivos em `.spec/` (a estrutura dos pacotes é criada por `/write-ears-spec`), código ou testes
 - Gravar arquivos quando `saida=` não foi informado
 
 ## Formato de saída
@@ -116,7 +116,7 @@ Para cada história, escreva caminho feliz, borda e erro. Use apenas exemplos da
 Monte a tabela de perguntas com evidência, interpretações, impacto e responsável. Não responda nem escolha interpretações.
 
 **Passo 6 - Validar e entregar.**
-Aplique o gate de qualidade da skill a cada história e reporte `PASS` ou `FAIL` com motivo. Grave em `saida=` somente se informado; caso contrário, devolva no chat. Indique quais histórias estão prontas para `/write-ears-spec` e quais dependem de resposta do Product Owner.
+Aplique o gate de qualidade da skill a cada história e reporte `PASS` ou `FAIL` com motivo. Grave em `saida=` somente se informado; caso contrário, devolva no chat. Agrupe as histórias pela funcionalidade da fonte a que pertencem, para que `/write-ears-spec` crie um pacote por funcionalidade. Indique quais histórias estão prontas para `/write-ears-spec` e quais dependem de resposta do Product Owner.
 
 ## Exemplo de invocação
 
