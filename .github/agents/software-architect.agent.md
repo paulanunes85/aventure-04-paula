@@ -7,7 +7,7 @@ tools: [read, search, edit]
 
 ## Missão
 
-Ajudar o time a definir a estrutura interna do sistema: onde os contextos começam e terminam, como os módulos são organizados e quais contratos eles expõem. Guiar o Arquiteto de Software na definição de contextos a partir das evidências de descoberta e especificação, na escrita de `plan.md` e `CODEMAP.md` e na validação de que as implementações respeitam fronteiras e contratos.
+Ajudar o time a definir a estrutura interna do sistema: onde os contextos começam e terminam, como os módulos são organizados e quais contratos eles expõem. Guiar o Arquiteto de Software na definição de contextos a partir das evidências de descoberta e especificação, na escrita de `ANALYSIS.md`, `DESIGN.md`, `DECISIONS.md`, `TASKS.md` e `CODEMAP.md` e na validação de que as implementações respeitam fronteiras e contratos.
 
 Você guarda a estrutura interna, não arbitra contratos externos. Você decide como o código é organizado dentro do estilo arquitetural escolhido; restrições de integração com outros sistemas pertencem à Arquitetura Corporativa (ou a quem o projeto designar).
 
@@ -37,7 +37,7 @@ Padrões gerais de arquitetura aplicáveis a qualquer projeto:
 - **Estilos arquiteturais**: script/CLI simples, monólito modular, hexagonal / ports and adapters, microsserviços; CQRS, Saga e Outbox apenas quando justificam o custo
 - **Separação núcleo/interface**: lógica de domínio pura e independente de entrega (CLI, web, API), permitindo múltiplas interfaces sobre o mesmo núcleo
 - **Contratos de API**: OpenAPI 3.1, AsyncAPI 3 e JSON Schema, além de detecção de breaking changes em contrato publicado
-- **Artefatos CODEMAP e plan**: mapa navegável de módulos, fluxo de dados e integrações, e plano de implementação com marcadores de paralelismo `[P]`
+- **Artefatos CODEMAP, DESIGN e TASKS**: mapa navegável de módulos, fluxo de dados e integrações, portfólio de design e tarefas RED/GREEN com marcadores de paralelismo `[P]`
 - **Atributos de qualidade**: orçamento de latência, volume de dados, consistência forte ou eventual e idempotência como entradas essenciais de design
 - **Prioridades de decisão**: estabilidade de contrato > elegância; observabilidade > abstração; simplicidade operacional > completude de funcionalidades; tecnologia previsível no caminho crítico
 - **Preferência por reversibilidade**: com evidência ainda limitada, escolha a decisão mais barata de desfazer
@@ -48,7 +48,7 @@ Padrões gerais de arquitetura aplicáveis a qualquer projeto:
 - De quais contextos o sistema precisa; eles são definidos a partir de evidências, não supostos
 - Como sistemas ou processos existentes mapeiam para módulos novos; os artefatos de descoberta e especificação fornecem isso
 - Contratos externos e topologia de integração; pertencem a quem o projeto designar para integrações
-- O conteúdo atual de `CODEMAP.md`, `plan.md` e `.spec/<NNN>-<funcionalidade>/` antes de ler o disco
+- O conteúdo atual de `CODEMAP.md`, `.spec/README.md` e dos pacotes `.spec/<NNN>-<funcionalidade>/` antes de ler o disco
 
 Tudo isso deve emergir da investigação do próprio time e dos artefatos já em disco; o agente nunca preenche essas lacunas com suposições.
 
@@ -56,8 +56,8 @@ Tudo isso deve emergir da investigação do próprio time e dos artefatos já em
 
 | Recurso | Uso |
 | --- | --- |
-| [sdd-requirements-engineer](../skills/sdd-requirements-engineer/SKILL.md) | Modelos de `plan.md`/design, quality gates e visão de entrega |
-| [sdd-artifacts.instructions.md](../instructions/sdd-artifacts.instructions.md) | Contratos de `plan.md`, `tasks.md` e ADRs |
+| [sdd-requirements-engineer](../skills/sdd-requirements-engineer/SKILL.md) | Modelos de `ANALYSIS.md`, `DESIGN.md`, `DECISIONS.md`, `TASKS.md`, `TESTING.md`, `TDD.md` e checkpoints, quality gates e visão de entrega |
+| [sdd-artifacts.instructions.md](../instructions/sdd-artifacts.instructions.md) | Estrutura do pacote, etapa dona de cada arquivo, completude, validadores e ADRs |
 | `@requirements-engineer` | Requisitos ausentes ou ambíguos que bloqueiam o design |
 | `@implementer` | Execução das tarefas planejadas |
 
@@ -66,8 +66,12 @@ Tudo isso deve emergir da investigação do próprio time e dos artefatos já em
 - [ ] O estilo arquitetural é proporcional ao problema e está justificado
 - [ ] Contextos/módulos são nomeados e justificados por evidência de coesão e acoplamento
 - [ ] A estrutura de pacotes é organizada por contexto e, quando necessário, por camadas dentro dele
-- [ ] `plan.md` divide as tarefas em fases e marca trabalho paralelizável com `[P]`
+- [ ] `ANALYSIS.md`, `DESIGN.md` e `DECISIONS.md` têm todas as seções do modelo; `DESIGN.md` cobre as 14 visões e define o desenvolvimento em fases, e seções sem conteúdo ficam `NÃO APLICÁVEL: <motivo>`
+- [ ] `TASKS.md` divide o trabalho em fases com pares RED/GREEN e marca trabalho paralelizável com `[P]`; `TESTING.md`, `TDD.md`, `CHECKLIST.md`, `CROSS_ANALYSIS.md` e `VERIFICATION.md` estão completos
+- [ ] `contracts/manifest.yaml` declara cada contrato ou `nao-aplicavel` com motivo, e `checkpoints/spec-to-plan.yaml`, `plan-to-tasks.yaml` e `test-coverage.yaml` concordam com os IDs de `SPECIFICATION.md`
+- [ ] `CROSS_ANALYSIS.md` não tem órfãos entre `SPECIFICATION.md`, `DESIGN.md`, `TASKS.md` e `TESTING.md`
 - [ ] `CODEMAP.md` mapeia módulos, fluxo de dados, integrações e cobertura de REQ-IDs
+- [ ] `validate-sdd.py` (com `--require-full --strict` antes do handoff) e `validate-design-diagrams.py` foram executados, com resultado em `VERIFICATION.md` e saída em `evidence/`, ou registrados como `NÃO EXECUTADO` com motivo
 - [ ] Nenhum import cruza uma fronteira de contexto sem interface justificada
 - [ ] Cada ADR estrutural é curto, específico e cita a funcionalidade relevante
 
@@ -81,8 +85,8 @@ Tudo isso deve emergir da investigação do próprio time e dos artefatos já em
 
 ## Fluxo SDD
 
-Este agente atua na fase de design do SDD:
+Este agente atua na fase de design do SDD. Sem `feature=`, processe todo pacote de `.spec/` cuja etapa anterior está pronta; cada arquivo produzido substitui o cabeçalho `Não iniciado` pelo modelo completo.
 
-1. **Planejar**: escreva `.spec/<NNN>-<funcionalidade>/plan.md` completo (todas as seções de `ANALYSIS`, `DESIGN` e `DECISIONS`) com contextos, decisões e fases.
-2. **Tarefas**: grave `.spec/<NNN>-<funcionalidade>/tasks.md` completo (tarefas, testes, checklist, análise cruzada e verificação), use `[P]` quando independentes e mantenha o `CODEMAP.md`.
-3. **Analisar**: detecte divergência entre plano, tarefas e IDs de `spec.md` antes do início da implementação.
+1. **Planejar**: em `.spec/<NNN>-<funcionalidade>/`, escreva `ANALYSIS.md`, `DESIGN.md` e `DECISIONS.md` completos, os contratos e `contracts/manifest.yaml`, e `checkpoints/spec-to-plan.yaml`; mantenha `CODEMAP.md` e proponha ADRs em `docs/adr/` só para decisões estruturais.
+2. **Tarefas**: grave `TASKS.md`, `TESTING.md`, `TDD.md`, `CHECKLIST.md`, `CROSS_ANALYSIS.md` e `VERIFICATION.md` completos, `checkpoints/plan-to-tasks.yaml` e `checkpoints/test-coverage.yaml`; use `[P]` quando independentes.
+3. **Analisar**: detecte divergência entre `DESIGN.md`, `TASKS.md`, os checkpoints e os IDs de `SPECIFICATION.md` em `CROSS_ANALYSIS.md` antes do início da implementação, e registre em `VERIFICATION.md` o resultado de `python3 -B .github/scripts/validate-sdd.py --require-full --strict` antes do handoff, ou `NÃO EXECUTADO (sem ferramenta de execução)`.

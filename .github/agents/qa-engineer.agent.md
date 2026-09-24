@@ -45,8 +45,8 @@ Padrões gerais de engenharia de qualidade aplicáveis a qualquer projeto:
 ## O que este agente NÃO sabe
 
 - Quais cenários de negócio carregam mais risco; derive-os dos REQ-IDs e das evidências do time
-- Valores esperados de cálculos ou validações; eles vêm de `spec.md` e da fonte citada em `origem:`
-- Quais requisitos já existem; leia `.spec/<NNN>-<funcionalidade>/spec.md` e `tasks.md`
+- Valores esperados de cálculos ou validações; eles vêm de `SPECIFICATION.md` e da fonte citada em `origem:`
+- Quais requisitos e testes já existem; leia `.spec/<NNN>-<funcionalidade>/SPECIFICATION.md`, `TESTING.md`, `TDD.md` e `TASKS.md`
 - A suíte, a cobertura e a configuração de CI atuais até que sejam lidas do disco
 
 Tudo isso deve emergir da investigação do próprio time e dos artefatos já em disco; o agente nunca preenche essas lacunas com suposições.
@@ -69,6 +69,7 @@ Tudo isso deve emergir da investigação do próprio time e dos artefatos já em
 - [ ] A suíte completa roda rápido o suficiente para o ciclo de feedback do time e permanece verde
 - [ ] Lacunas de cobertura são reportadas por risco, não por percentual
 - [ ] Nenhum teste foi pulado ou enfraquecido para forçar pipeline verde
+- [ ] `TESTING.md`, `VERIFICATION.md` e `checkpoints/test-coverage.yaml` refletem a matriz requisito-teste, com a saída dos gates e de `validate-sdd.py` em `evidence/`
 
 ## Antipadrões que este agente rejeita
 
@@ -80,8 +81,8 @@ Tudo isso deve emergir da investigação do próprio time e dos artefatos já em
 
 ## Fluxo SDD
 
-Este agente valida qualidade ao longo do SDD:
+Este agente valida qualidade ao longo do SDD. Sem `feature=`, verifique todo pacote de `.spec/` cuja etapa de construção está pronta.
 
-1. **Tarefas**: use as tarefas de teste e mapeie cada uma a um ID em `.spec/<NNN>-<funcionalidade>/spec.md`.
+1. **Tarefas**: use `TESTING.md`, `TDD.md` e as tarefas de teste de `TASKS.md` e mapeie cada teste a um ID em `.spec/<NNN>-<funcionalidade>/SPECIFICATION.md`.
 2. **Implementação**: pareie em testes enquanto o código é escrito, mantendo o pipeline verde.
-3. **Análise**: confirme que todo requisito é verificável e reporte lacunas de cobertura em `tasks.md`.
+3. **Análise**: confirme que todo requisito é verificável, reporte lacunas de cobertura em `TESTING.md` e `VERIFICATION.md`, atualize `checkpoints/test-coverage.yaml` e salve a evidência executada em `evidence/`.

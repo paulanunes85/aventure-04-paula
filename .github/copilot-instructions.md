@@ -30,7 +30,7 @@ Não adicione dependências, frameworks ou serviços que não estejam nesta tabe
 
 ## Convenções
 
-- Siga Spec-Driven Development: requisito aprovado em `.spec/<NNN>-<funcionalidade>/spec.md` antes de código. Toda especificação fica sempre em `.spec/`.
+- Siga Spec-Driven Development: requisito aprovado em `.spec/<NNN>-<funcionalidade>/SPECIFICATION.md` antes de código. Toda especificação fica sempre em `.spec/`, um pacote por funcionalidade com a estrutura completa (13 arquivos em maiúsculas e as pastas `checkpoints/`, `contracts/` e `evidence/`) definida em [sdd-artifacts.instructions.md](instructions/sdd-artifacts.instructions.md).
 - IDs: `REQ-NNN` (funcional), `NFR-NNN` (não funcional), `AC-<ID>-NN` (aceite), `SRC-###` (fonte). Preserve IDs já existentes no documento de origem.
 - Todo requisito tem uma linha `origem:` apontando para uma fonte verificável ou `[GREENFIELD]` com justificativa.
 - Todo teste que verifica um requisito cita o ID em comentário.
@@ -47,18 +47,18 @@ Não adicione dependências, frameworks ou serviços que não estejam nesta tabe
 | Instruções por arquivo | [.github/instructions/](instructions/) | Artefatos SDD, testes, frontend (plataforma e componentes), autoria de skills e de hooks |
 | Hooks | [.github/hooks/](hooks/) | Guardrails em `preToolUse`, contexto em `sessionStart`, auditoria sem conteúdo sensível e quality gate opcional; política em `hooks/config/policy.json` |
 
-Fluxo sugerido: `@requirements-engineer` (spec) → `@se-ux-ui-designer` (quando houver UI) → `@software-architect` (plan) → `@implementer` + `@qa-engineer` (tasks, código e testes).
+Fluxo sugerido: `@requirements-engineer` (`SPECIFICATION.md` e estrutura dos pacotes) → `@se-ux-ui-designer` (quando houver UI) → `@software-architect` (`DESIGN.md` e `TASKS.md`) → `@implementer` + `@qa-engineer` (código, testes, `evidence/` e `VERIFICATION.md`).
 
 | Etapa | Prompt | Agente | Artefato |
 | --- | --- | --- | --- |
 | 1. Descoberta | `/refine-user-stories` | `@requirements-engineer` | Histórias INVEST e perguntas em aberto |
-| 2. Especificação | `/write-ears-spec` | `@requirements-engineer` | `.spec/<NNN>-<funcionalidade>/` com `frd.md`, `nfrd.md` e `spec.md` (e `CONSTITUTION.md`, se ausente) |
+| 2. Especificação | `/write-ears-spec` | `@requirements-engineer` | Um pacote por funcionalidade em `.spec/` com a estrutura completa (`SPECIFICATION.md`, `SOURCE_TRACEABILITY.md`, `FRD.md` e `NFRD.md` produzidos), índice `.spec/README.md` e `CONSTITUTION.md`, se ausente |
 | 2. Especificação (UI) | `/research-ux` | `@se-ux-ui-designer` | `docs/ux/<funcionalidade>-pesquisa.md` |
-| 2. Especificação | `/validate-spec` | `@requirements-engineer` | Achados e status `Pronto para revisão` |
-| 3. Design | `/plan-architecture` | `@software-architect` | `plan.md`, `CODEMAP.md`, ADRs propostos |
-| 3. Design | `/break-down-tasks` | `@software-architect` | `tasks.md` com pares RED/GREEN |
-| 4. Construção | `/implement-task` | `@implementer` | Código, testes e evidência em `tasks.md` |
-| 4. Construção | `/verify-quality` | `@qa-engineer` | Matriz requisito-teste e gates |
+| 2. Especificação | `/validate-spec` | `@requirements-engineer` | Achados na seção `Validação` de `SPECIFICATION.md` e status `Pronto para revisão` |
+| 3. Design | `/plan-architecture` | `@software-architect` | `ANALYSIS.md`, `DESIGN.md`, `DECISIONS.md`, `contracts/`, `checkpoints/spec-to-plan.yaml`, `CODEMAP.md`, ADRs propostos |
+| 3. Design | `/break-down-tasks` | `@software-architect` | `TASKS.md`, `TESTING.md`, `TDD.md`, `CHECKLIST.md`, `CROSS_ANALYSIS.md`, `VERIFICATION.md` e checkpoints |
+| 4. Construção | `/implement-task` | `@implementer` | Código, testes, `evidence/` e registro em `TASKS.md`/`VERIFICATION.md` |
+| 4. Construção | `/verify-quality` | `@qa-engineer` | Matriz requisito-teste, `TESTING.md`, `VERIFICATION.md` e `evidence/` |
 
 Ordem de execução detalhada e atuação dos hooks por etapa: [prompts/README.md](prompts/README.md).
 

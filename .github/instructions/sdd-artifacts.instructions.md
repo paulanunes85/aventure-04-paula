@@ -105,7 +105,16 @@ Execute a partir da raiz, nesta ordem, e registre comando, data, código de saí
 
 Opções de `validate-sdd.py`: `--package 001` limita a um pacote (cobertura da fonte e índice continuam globais); `--source-id-pattern '<regex>'` troca o padrão de IDs do documento de origem; `--format json` gera saída para CI. Códigos de saída: `0` sem erros, `1` com erros (ou avisos com `--strict`), `2` sem pacote em `.spec/`.
 
-Os demais scripts de `.github/scripts/` vieram de outro projeto (esperam `.specs/` e títulos em inglês) e não validam este repositório; não os cite como evidência. Sem acesso a terminal, reporte os validadores como `NÃO EXECUTADO (sem ferramenta de execução)` e faça a verificação manual:
+Scripts de apoio (independentes de stack, só biblioteca padrão; testes em `python3 -B -m unittest discover -s .github/scripts -p 'test_sdd_tools.py'`):
+
+| Script | Uso |
+| --- | --- |
+| `format-sdd-mermaid.py [--check]` | Aplica a diretiva de tema claro aos blocos Mermaid; `--check` só reporta (CI) |
+| `validate-red-phase.py --expect-output '<REQ-ID>' -- <comando de teste>` | Evidência da fase RED: passa só quando o teste alvo falha com a saída esperada |
+| `validate-doc-references.py` | Caminhos e comandos citados em código inline existem (ignora planos, exemplos, `.spec/` e customizações) |
+| `verify-hooks-loaded.py [--require-runtime] [--session <id>]` | Descritores de `.github/hooks/` carregáveis, scripts existentes, `disableAllHooks` desligado e registro `sessionStart` na auditoria |
+
+Sem acesso a terminal, reporte os validadores como `NÃO EXECUTADO (sem ferramenta de execução)` e faça a verificação manual:
 
 - Todo pacote tem os 13 arquivos e as 3 pastas com `README.md`; arquivos produzidos têm todas as seções do modelo.
 - Todo ID da fonte tem disposição em algum pacote e todo pacote está no índice.

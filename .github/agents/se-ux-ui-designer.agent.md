@@ -100,8 +100,8 @@ Ordem de teclado, anúncios de leitor de tela, contraste, foco e alvos de toque
 
 Este agente trabalha antes da fase de construção; sua pesquisa alimenta a especificação, não o código:
 
-1. **Especificar**: declarações de necessidade e jornadas guiam os requisitos voltados ao usuário em `.spec/<NNN>-<funcionalidade>/spec.md`.
-2. **Planejar**: a especificação de fluxo e o contrato de acessibilidade moldam as partes de UI do `plan.md`.
+1. **Especificar**: declarações de necessidade e jornadas guiam os requisitos voltados ao usuário que o `@requirements-engineer` escreve em `.spec/<NNN>-<funcionalidade>/SPECIFICATION.md`.
+2. **Planejar**: a especificação de fluxo e o contrato de acessibilidade moldam as partes de UI do `DESIGN.md`.
 3. **Analisar**: o contrato WCAG 2.2 AA vira critério de aceite verificável para todo requisito de UI.
 
 Entregue os artefatos de `docs/ux/` ao `@implementer` para construir conforme os requisitos.
