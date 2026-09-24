@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Apply the canonical light theme to SDD and primitive Mermaid blocks."""
+"""Apply the canonical light theme to SDD and primitive Mermaid blocks.
+
+Companion of validate-design-diagrams.py: it adds the theme directive
+but never invents the classDef palette. Use --check in CI (exit 1 when a
+file needs formatting).
+"""
 
 from __future__ import annotations
 
@@ -7,7 +12,7 @@ import argparse
 import pathlib
 import re
 
-ROOT = pathlib.Path(__file__).resolve().parents[1]
+ROOT = pathlib.Path(__file__).resolve().parents[2]
 GITHUB_ROOT = ROOT / ".github"
 BLOCK_PATTERNS = (
     re.compile(
@@ -37,7 +42,7 @@ PALETTE = frozenset(
     }
 )
 DEFAULT_ROOTS = (
-    ROOT / ".specs",
+    ROOT / ".spec",
     GITHUB_ROOT / "skills",
     GITHUB_ROOT / "agents",
     GITHUB_ROOT / "prompts",
@@ -78,7 +83,7 @@ def main(argv: list[str] | None = None) -> int:
         type=pathlib.Path,
         default=None,
         help=(
-            "format only this root; by default formats .specs and canonical "
+            "format only this root; by default formats .spec and canonical "
             ".github skills, agents, prompts, and instructions"
         ),
     )

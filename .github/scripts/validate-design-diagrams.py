@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Validate the universal light Mermaid theme across SDD and primitives."""
+"""Validate the universal light Mermaid theme across SDD and primitives.
+
+Contract: .github/skills/sdd-requirements-engineer/references/
+sdd-document-and-mermaid-standard.md. Read-only; it does not render
+diagrams. Exit codes: 0 clean, 1 findings, 2 no diagram found.
+"""
 
 from __future__ import annotations
 
@@ -32,10 +37,7 @@ PALETTE = (
     "classDef zone fill:#F2F2F2,stroke:#999999,color:#222222",
     "classDef external fill:#E8E8E8,stroke:#555555,color:#222222",
 )
-FROZEN = {
-    "005-aeg-open-horizons-azure-dev-pilot",
-    "006-terraform-adoption-live-azure",
-}
+PACKAGE_FILES = {"spec.md", "plan.md", "tasks.md", "frd.md", "nfrd.md"}
 DEFAULT_ROOTS = (
     ROOT / ".spec",
     GITHUB_ROOT / "skills",
@@ -63,11 +65,7 @@ def diagram_kind(body: str) -> str:
 
 
 def canonical_graph_artifact(path: pathlib.Path) -> bool:
-    if (
-        path.name in {"plan.md", "tasks.md", "frd.md", "nfrd.md"}
-        and path.parent.name not in FROZEN
-        and (path.parent / "spec.md").is_file()
-    ):
+    if path.name in PACKAGE_FILES and path.parent.parent.name == ".spec":
         return True
     try:
         relative = path.resolve().relative_to(GITHUB_ROOT)

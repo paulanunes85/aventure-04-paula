@@ -1,6 +1,6 @@
 ---
 name: "sdd-requirements-engineer"
-description: "Elicita, normaliza, valida e rastreia requisitos em um fluxo completo de Spec-Driven Development usando EARS. Use ao converter notas, PRDs, documentos de requisitos, atas, evidências de sistemas existentes ou insumos de design em FRD/NFRD, spec.md, plan.md, tasks.md, matrizes de rastreabilidade, quality gates ou um handoff SDD pronto para implementação. Gatilhos: EARS, requisitos, especificação, SDD, spec-driven, FRD, NFRD, rastreabilidade, critérios de aceite."
+description: "Elicita, normaliza, valida e rastreia requisitos em um fluxo completo de Spec-Driven Development usando EARS. Use ao converter notas, PRDs, documentos de requisitos, atas, evidências de sistemas existentes ou insumos de design em pacotes .spec/ (SPECIFICATION, SOURCE_TRACEABILITY, FRD, NFRD, ANALYSIS, DESIGN, DECISIONS, TASKS, TESTING, TDD, CHECKLIST, CROSS_ANALYSIS, VERIFICATION, checkpoints, contracts, evidence), quality gates ou um handoff SDD pronto para implementação. Gatilhos: EARS, requisitos, especificação, SDD, spec-driven, FRD, NFRD, rastreabilidade, critérios de aceite."
 ---
 
 # Engenharia de requisitos SDD com EARS
@@ -19,8 +19,8 @@ Transforme intenção de produto incompleta ou evidências de design existentes 
 
 | Modo | Ponto de partida | Entregável |
 | --- | --- | --- |
-| Requisitos | Notas, PRD, issue, entrevistas, documento de requisitos ou evidência de sistema existente | Análise de lacunas mais `frd.md`, `nfrd.md` e `spec.md` completos (e `CONSTITUTION.md`, se ausente) |
-| SDD completo | Requisitos brutos ou aprovados | Pacote inteiro: `CONSTITUTION.md`, `frd.md`, `nfrd.md`, `spec.md`, `plan.md`, `tasks.md`, `CODEMAP.md` e ADRs necessários, com análise, decisões, gates e rastreabilidade |
+| Requisitos | Notas, PRD, issue, entrevistas, documento de requisitos ou evidência de sistema existente | Um pacote por funcionalidade da fonte, com a estrutura completa e `SPECIFICATION.md`, `SOURCE_TRACEABILITY.md`, `FRD.md` e `NFRD.md` produzidos; índice `.spec/README.md` e `CONSTITUTION.md`, se ausente |
+| SDD completo | Requisitos brutos ou aprovados | Todos os pacotes com os 13 arquivos produzidos, `checkpoints/`, `contracts/`, `evidence/`, `CODEMAP.md` e ADRs necessários |
 | Design-first | Esboço de arquitetura, contrato de API, modelo de dados ou protótipo | Requisitos recuperados, premissas explícitas e depois a cadeia SDD completa |
 | Validação | FRD, NFRD, especificação, design ou tarefas existentes | Achados por severidade, declarações EARS corrigidas e decisão de prontidão |
 | Handoff | Artefatos SDD revisados | Pacote de implementação delimitado, com gates, dependências e bloqueios não resolvidos |
@@ -29,15 +29,15 @@ Selecione o menor modo que atende ao pedido. Todo modo que grava artefatos os pr
 
 ## Contrato do repositório
 
-Leia primeiro as [instruções de artefatos SDD](../../instructions/sdd-artifacts.instructions.md) e o [copilot-instructions.md](../../copilot-instructions.md). Elas definem o pacote de artefatos, a etapa dona de cada arquivo e a regra de completude. Em resumo:
+Leia primeiro as [instruções de artefatos SDD](../../instructions/sdd-artifacts.instructions.md) e o [copilot-instructions.md](../../copilot-instructions.md). Elas definem a estrutura obrigatória, a etapa dona de cada arquivo, a decomposição em funcionalidades e a regra de completude. Em resumo:
 
-- `Requisitos` grava `.spec/<NNN>-<funcionalidade>/frd.md`, `nfrd.md` e `spec.md`, e cria `CONSTITUTION.md` quando o repositório não tiver constituição.
-- O design grava `plan.md`, `CODEMAP.md` e ADRs; a quebra de tarefas grava `tasks.md`.
-- Todo arquivo segue o modelo completo desta skill: nenhuma seção é omitida, e seções sem conteúdo ficam `NÃO APLICÁVEL: <motivo>`.
-- A declaração EARS, o aceite e a verificação de cada requisito vivem apenas em `spec.md`. `frd.md` e `nfrd.md` referenciam por ID e acrescentam domínio, atores, justificativa, aplicabilidade e envelope de medição.
-- Plano de implementação separado, plano de testes separado e manifesto de testes são os únicos artefatos adicionais, criados apenas quando o risco ou a automação existente exigirem.
+- Todo pacote `.spec/<NNN>-<funcionalidade>/` tem 13 arquivos em maiúsculas (`SPECIFICATION.md`, `SOURCE_TRACEABILITY.md`, `FRD.md`, `NFRD.md`, `ANALYSIS.md`, `DESIGN.md`, `DECISIONS.md`, `TASKS.md`, `TESTING.md`, `TDD.md`, `CHECKLIST.md`, `CROSS_ANALYSIS.md`, `VERIFICATION.md`) e 3 pastas (`checkpoints/`, `contracts/`, `evidence/`), cada pasta com `README.md`.
+- Criar as specs a partir de uma fonte significa criar um pacote para cada funcionalidade da fonte e o índice `.spec/README.md`; só `feature=` restringe a um pacote.
+- `Requisitos` cria a estrutura inteira, produz os quatro arquivos de requisitos e deixa os demais com `Status: Não iniciado` até a etapa dona.
+- Todo arquivo produzido segue o modelo completo desta skill: nenhuma seção é omitida, e seções sem conteúdo ficam `NÃO APLICÁVEL: <motivo>`.
+- A declaração EARS, o aceite e a verificação de cada requisito vivem apenas em `SPECIFICATION.md`; `SOURCE_TRACEABILITY.md` é dono das fontes e da cobertura da fonte; os demais arquivos referenciam por ID.
 
-Use `REQ-NNN`/`NFR-NNN`, `AC-<ID>-NN` e uma linha `origem:` válida, salvo se o repositório já tiver outro esquema. Preserve identificadores e especificações existentes. Toda especificação fica em `.spec/`; não crie `specs/` ou `.specs/` nem renomeie artefatos existentes. Só exija verificações executáveis que existam no repositório; validação textual não é evidência de runtime nem de aprovação.
+Use `REQ-NNN`/`NFR-NNN`, `AC-<ID>-NN` e uma linha `origem:` válida, salvo se o repositório já tiver outro esquema. Preserve identificadores e especificações existentes. Toda especificação fica em `.spec/`; não crie `specs/`, `.specs/` nem arquivos em minúsculas (`spec.md`, `plan.md`, `tasks.md`), e não renomeie IDs existentes. Só exija verificações executáveis que existam no repositório; validação textual não é evidência de runtime nem de aprovação.
 
 ## Política de fontes e evidências
 
@@ -56,6 +56,7 @@ Atribua a cada fonte um identificador estável `SRC-###`. Um artefato derivado n
    - Inspecione instruções, modelos, especificações e convenções de nomes do repositório antes de criar arquivos.
    - Identifique se o pedido é requirements-first, design-first, apenas validação ou apenas handoff.
    - Registre os caminhos de saída solicitados e se o usuário já autorizou a criação de arquivos. Se a criação não foi pedida, devolva rascunhos ou achados de revisão sem gravar.
+   - Inventárie todos os IDs da fonte e decomponha a fonte em funcionalidades (fase, capacidade, ator ou superfície de entrega). Crie um pacote por funcionalidade e atribua cada ID da fonte a exatamente um pacote; registre o mapa no índice `.spec/README.md`.
 
 2. Classifique o contexto do projeto.
 
@@ -81,7 +82,7 @@ Atribua a cada fonte um identificador estável `SRC-###`. Um artefato derivado n
 
 4. Escreva ou normalize requisitos.
    - Leia a [referência de notação EARS](references/ears-notation.md) antes de escrever requisitos normativos.
-   - Grave `frd.md` com o [modelo de FRD](references/frd-template.md) e `nfrd.md` com o [modelo de NFRD](references/nfrd-template.md), completos, referenciando os IDs canônicos de `spec.md`.
+   - Grave `FRD.md` com o [modelo de FRD](references/frd-template.md) e `NFRD.md` com o [modelo de NFRD](references/nfrd-template.md), completos, referenciando os IDs canônicos de `SPECIFICATION.md`.
    - Siga o esquema de IDs do repositório. Preserve IDs existentes; IDs genéricos dos modelos não são instrução de migração.
    - Escreva uma resposta observável do sistema por declaração EARS. Divida comportamento composto.
    - Mantenha requisitos funcionais neutros quanto à implementação. Coloque restrições tecnológicas genuínas no NFRD, com justificativa e fonte.
@@ -93,17 +94,17 @@ Atribua a cada fonte um identificador estável `SRC-###`. Um artefato derivado n
 5. Construa a cadeia de artefatos SDD.
    - Leia os [modelos de artefatos SDD](references/spec-templates.md) e o [padrão de documentos SDD e Mermaid](references/sdd-document-and-mermaid-standard.md).
    - Reutilize a constituição do repositório quando existir. Se não existir, crie `CONSTITUTION.md` como `Rascunho` com princípios derivados de fontes verificáveis. Não crie uma constituição local conflitante.
-   - Para SDD completo, crie ou atualize todos os arquivos do pacote: FRD, NFRD, especificação e rastreabilidade de fontes; análise, design e decisões em `plan.md`; tarefas, testes, checklist, análise cruzada e verificação em `tasks.md`. Adicione planos ou manifestos separados apenas quando o risco justificar.
+   - Para SDD completo, produza todos os 13 arquivos de cada pacote, os checkpoints, o manifesto de contratos e os índices das pastas, na ordem das etapas.
    - Use todas as seções do modelo `DESIGN`, cobrindo as 14 visões do portfólio (declarando `NÃO APLICÁVEL` com motivo quando for o caso), o tema Mermaid claro universal, as classes canônicas de grafo e uma visão de entrega que conecte requisitos, componentes, tarefas, dependências, evidências e estado atual versus alvo.
-   - Escreva checkboxes de tarefas ordenadas por dependência com metadados de sequência/plano/requisito/mudança/evidência, um DAG completo, mapa de testes, gate de conclusão e registro; marque apenas tarefas com evidência completa e use `[P]` apenas quando forem realmente independentes.
-   - Use pastas sequenciais como `001-nome-da-funcionalidade` apenas ao iniciar ou seguir essa convenção do repositório.
+   - Escreva em `TASKS.md` checkboxes ordenadas por dependência com metadados de sequência/plano/requisito/mudança/evidência, um DAG completo, gate de conclusão e registro; em `TESTING.md` o catálogo e o mapa de testes; em `TDD.md` um ciclo por critério de aceite. Marque apenas tarefas com evidência em `evidence/` e use `[P]` apenas quando forem realmente independentes.
+   - Use pastas sequenciais `001-nome-da-funcionalidade`, preservando a numeração existente.
 
 6. Garanta rastreabilidade ponta a ponta.
-   - Dê a todo requisito ativo um mapeamento explícito de fonte em `spec.md` e mantenha sua linha `origem:`.
-   - Mapeie cada requisito ativo para componentes de design em `plan.md` e para tarefas, critérios de aceite e verificação planejada ou executada em `tasks.md`. Arquivos de rastreabilidade separados são opcionais.
+   - Dê a todo requisito ativo sua linha `origem:` em `SPECIFICATION.md` e uma linha na matriz de `SOURCE_TRACEABILITY.md`.
+   - Mapeie cada requisito ativo em `DESIGN.md`, `TASKS.md`, `TESTING.md`, `CROSS_ANALYSIS.md`, `VERIFICATION.md` e nos checkpoints, e cada critério de aceite em `TDD.md`.
    - Rejeite requisitos, elementos de design, tarefas e testes órfãos.
    - Registre IDs transferidos, substituídos, divididos, mesclados ou aposentados em uma tabela de disposição. Nunca renumere silenciosamente requisitos estáveis.
-   - Preserve o mesmo significado normativo em FRD/NFRD, especificação, design, tarefas e testes. Referencie por ID em vez de copiar texto que pode divergir; resumos e contagens de `frd.md` e `nfrd.md` concordam com `spec.md`.
+   - Preserve o mesmo significado normativo em todos os arquivos. Referencie por ID em vez de copiar texto que pode divergir; resumos e contagens concordam com `SPECIFICATION.md`.
 
 7. Valide e entregue.
    - Aplique todas as verificações aplicáveis dos [quality gates unificados](references/quality-gates.md).
@@ -153,7 +154,7 @@ Carregue apenas os recursos exigidos pelo modo selecionado:
 - [Notação EARS](references/ears-notation.md): sintaxe, classificação, exemplos, defeitos e referências acadêmicas.
 - [Modelo de FRD](references/frd-template.md): escopo funcional, atores, requisitos por domínio, aceite e entrega em fases.
 - [Modelo de NFRD](references/nfrd-template.md): restrições de qualidade mensuráveis e envelopes de medição.
-- [Modelos de artefatos SDD](references/spec-templates.md): responsabilidades completas dos artefatos e modelos concisos.
+- [Modelos de artefatos SDD](references/spec-templates.md): estrutura do pacote e modelo de cada arquivo, checkpoint, contrato e índice.
 - [Padrão de documentos SDD e Mermaid](references/sdd-document-and-mermaid-standard.md): contratos canônicos de artefatos, tema claro universal de diagramas, contrato de checklist/registro de tarefas e gates executáveis.
 - [Quality gates unificados](references/quality-gates.md): verificações detalhadas de prontidão, EARS, rastreabilidade e handoff.
 - [Catálogo de antipadrões](references/anti-patterns.md): defeitos de requisitos e SDD com ação corretiva.
@@ -206,11 +207,12 @@ Devolva exatamente esta estrutura:
 - [ ] O modo de operação selecionado é o menor que atende ao pedido.
 - [ ] Precedência de fontes, premissas, bloqueios e autorização de gravação estão explícitos.
 - [ ] Todo requisito normativo atende ao contrato de requisito EARS.
-- [ ] `frd.md` e `nfrd.md` existem com todas as seções do modelo, cobrem toda categoria aplicável e referenciam os IDs de `spec.md` sem redefini-los.
-- [ ] Todo arquivo do pacote da etapa existe, tem todas as seções do modelo e é internamente consistente; seções sem conteúdo estão `NÃO APLICÁVEL` com motivo.
+- [ ] Toda funcionalidade da fonte tem pacote, todo ID da fonte tem disposição e todo pacote está no índice `.spec/README.md`.
+- [ ] Todo pacote tem os 13 arquivos e as 3 pastas; arquivos produzidos têm todas as seções do modelo e os de etapas futuras estão `Não iniciado`.
+- [ ] `FRD.md` e `NFRD.md` cobrem toda categoria aplicável e referenciam os IDs de `SPECIFICATION.md` sem redefini-los.
 - [ ] Todo diagrama Mermaid usa o tema claro universal e todo diagrama tipo grafo carrega as classes neutras canônicas.
-- [ ] `plan.md` mapeia requisitos por componentes, tarefas, dependências, testes/evidências e estado atual versus alvo.
-- [ ] Checkboxes de `tasks.md`, DAG aplicável, mapa de testes e registro de verificação concordam; implementação parcial não é marcada como concluída.
+- [ ] `DESIGN.md` mapeia requisitos por componentes, tarefas, dependências, testes/evidências e estado atual versus alvo.
+- [ ] `TASKS.md`, `TESTING.md`, `TDD.md`, `VERIFICATION.md` e os checkpoints concordam; implementação parcial não é marcada como concluída.
 - [ ] Todo requisito ativo é rastreável da fonte ao design, tarefas, aceite e verificação.
 - [ ] Mudanças de ciclo de vida preservam IDs ou incluem disposições explícitas.
 - [ ] Nenhuma métrica, aprovação, afirmação de compatibilidade ou fato atual de plataforma foi fabricado.

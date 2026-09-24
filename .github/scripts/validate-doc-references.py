@@ -1,14 +1,18 @@
 #!/usr/bin/env python3
 """Validate repository paths and commands named in Markdown inline code.
 
-`validate-docs.sh` owns Markdown link resolution. This companion gate covers
-path-shaped inline-code references in operational documentation, such as
-`.github/mcp.json`, and commands such as
-`python3 scripts/validate-spec-artifacts.py`. The `.specs/` tree is excluded by
-default because it declares future implementation surfaces and has dedicated
-SDD gates; pass `--include-specs` for a non-gating audit. Unchecked task blocks
-and references explicitly described as planned, optional, or absent are not
-current-state claims and are also excluded.
+Relative Markdown links are covered by validate-sdd.py; this gate covers
+path-shaped inline code such as `.github/hooks/config/policy.json` or
+`python3 -B .github/scripts/validate-sdd.py`. A token is checked when it
+starts with `./`, `../`, a known root prefix or an existing top-level
+entry, or when it is a bare root file (README.md, CONSTITUTION.md...).
+
+Not current-state claims, therefore skipped: fenced code, unchecked task
+items, paragraphs marked planned/optional/absent, documents whose YAML
+front matter status is draft/planned/proposed/superseded/archived, the
+`.spec/` tree (it declares future surfaces; use --include-specs for an
+advisory audit) and the agent customizations, whose templates describe
+artifacts a project creates later. Exit codes: 0 clean, 1 findings.
 """
 
 from __future__ import annotations
@@ -17,107 +21,48 @@ import argparse
 import re
 import shlex
 import sys
+from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 
-INLINE_CODE_PATTERN = re.compile(r"`([^`\n]+)`")
-TASK_PATTERN = re.compile(r"^\s*-\s+\[(?P<state>[ xX])\]\s+")
-FENCE_PATTERN = re.compile(r"^\s*(```|~~~)")
-HEADING_PATTERN = re.compile(r"^\s*#{1,6}\s+")
+ROOT = Path(__file__).resolve().parents[2]
+INLINE_CODE = re.compile(r"`([^`\n]+)`")
+TASK = re.compile(r"^\s*-\s+\[(?P<state>[ xX])\]\s+")
+FENCE = re.compile(r"^\s*(```|~~~)")
+HEADING = re.compile(r"^\s*#{1,6}\s+")
 
-ROOT_PATH_PREFIXES = (
-    ".claude/",
-    ".github/",
-    ".specs/",
-    ".vscode/",
-    "argocd/",
-    "backstage/",
-    "deploy/",
-    "docker/",
-    "docs/",
-    "grafana/",
-    "mcp-servers/",
-    "policies/",
-    "prometheus/",
-    "registry/",
-    "scripts/",
-    "stack-profiles/",
-    "terraform/",
-    "tests/",
+DEFAULT_PREFIXES = (
+    ".github/", ".spec/", ".vscode/", "docs/", "scripts/", "src/",
+    "test/", "tests/",
 )
-
-BARE_REFERENCE_FILES = {
-    "AGENTS.md",
-    "ANALYSIS.md",
-    "CODEMAP.md",
-    "CONSTITUTION.md",
-    "DECISIONS.md",
-    "DESIGN.md",
-    "README.md",
-    "SPECIFICATION.md",
-    "TASKS.md",
-    "TESTING.md",
-    "VERIFICATION.md",
+BARE_FILES = {
+    "AGENTS.md", "CHANGELOG.md", "CODEMAP.md", "CONSTITUTION.md",
+    "CONTRIBUTING.md", "README.md", "SECURITY.md",
 }
-
 NON_CURRENT_MARKERS = (
-    "[absent]",
-    "[ausente]",
-    "[optional]",
-    "[opcional]",
-    "[planned]",
-    "[planejado]",
-    "does not exist",
-    "do not exist",
-    "is not present",
-    "is absent",
-    "is missing",
-    "are absent",
-    "missing path",
-    "no tracked",
-    "not recognized",
-    "não existe",
-    "não existem",
+    "[absent]", "[ausente]", "[optional]", "[opcional]", "[planned]",
+    "[planejado]", "does not exist", "is absent", "is missing",
+    "não existe", "não existem", "ainda não existe", "será criado",
+    "quando existir",
 )
-
-EXCLUDED_DIRECTORY_NAMES = {
-    ".cache",
-    ".git",
-    # Sealed run receipts, not repository documentation. They are gitignored,
-    # so a clone has none and only a machine that has executed the fleet sees
-    # them; scanning them made this gate's verdict depend on local history,
-    # and policy forbids writing there to correct whatever it reported.
-    ".test-results",
-    ".terraform",
-    ".tox",
-    ".venv",
-    "node_modules",
-    "vendor",
+NON_CURRENT_STATUSES = {
+    "archived", "arquivado", "draft", "rascunho", "planned", "planejado",
+    "proposed", "proposto", "superseded", "substituído",
+}
+EXCLUDED_DIRS = {
+    ".cache", ".git", ".mypy_cache", ".pytest_cache", ".tox", ".venv",
+    "__pycache__", "build", "coverage", "dist", "node_modules", "vendor",
     "venv",
 }
-
 EXCLUDED_PREFIXES = (
-    Path(".claude"),
     Path(".github/agents"),
     Path(".github/instructions"),
     Path(".github/prompts"),
     Path(".github/skills"),
-    Path(".open-horizons/catalog"),
-    Path("docs/aeg-feature-scaffold"),
-    Path("docs/foundry-templates-references"),
-    Path("docs/md"),
-    Path("docs/microsoft-agent-framwork-example"),
+    Path(".github/hooks/.logs"),
 )
-
-TRAILING_PUNCTUATION = ".,;:)]}"
-LEADING_PUNCTUATION = "([{"
-NON_CURRENT_DOCUMENT_STATUSES = {
-    "archived",
-    "draft",
-    "planned",
-    "proposed",
-    "superseded",
-}
+SPEC_DIR = Path(".spec")
+SKIP_MARKERS = ("*", "?", "{", "}", "<", ">", "$", "|", "...", "…")
 
 
 @dataclass(frozen=True)
@@ -128,37 +73,41 @@ class Finding:
     reason: str
 
 
+def root_prefixes(root: Path) -> tuple[str, ...]:
+    entries = {
+        f"{path.name}/" for path in root.iterdir()
+        if path.is_dir() and path.name not in EXCLUDED_DIRS
+    }
+    return tuple(sorted(entries | set(DEFAULT_PREFIXES)))
+
+
 def is_excluded(path: Path, root: Path, include_specs: bool) -> bool:
     relative = path.relative_to(root)
-    if any(part in EXCLUDED_DIRECTORY_NAMES for part in relative.parts):
+    if any(part in EXCLUDED_DIRS for part in relative.parts):
         return True
-    if not include_specs and relative.is_relative_to(Path(".specs")):
+    if not include_specs and relative.is_relative_to(SPEC_DIR):
         return True
-    return any(relative.is_relative_to(prefix) for prefix in EXCLUDED_PREFIXES)
+    return any(relative.is_relative_to(p) for p in EXCLUDED_PREFIXES)
 
 
-def markdown_files(
-    root: Path, paths: list[Path], include_specs: bool
-) -> list[Path]:
+def markdown_files(root: Path, paths: list[Path],
+                   include_specs: bool) -> list[Path]:
     files: set[Path] = set()
     for path in paths:
-        resolved = path if path.is_absolute() else root / path
-        if resolved.is_file():
-            if resolved.suffix.lower() == ".md" and not is_excluded(
-                resolved, root, include_specs
-            ):
-                files.add(resolved)
-            continue
-        if not resolved.is_dir():
-            continue
-        for candidate in resolved.rglob("*.md"):
-            if not is_excluded(candidate, root, include_specs):
+        resolved = (path if path.is_absolute() else root / path).resolve()
+        if resolved.is_dir():
+            candidates = list(resolved.rglob("*.md"))
+        else:
+            candidates = [resolved] if resolved.is_file() else []
+        for candidate in candidates:
+            if candidate.suffix.lower() == ".md" and not is_excluded(
+                    candidate, root, include_specs):
                 files.add(candidate)
     return sorted(files)
 
 
-def document_is_non_current(source: Path) -> bool:
-    lines = source.read_text(encoding="utf-8").splitlines()
+def document_is_non_current(text: str) -> bool:
+    lines = text.splitlines()
     if not lines or lines[0].strip() != "---":
         return False
     for line in lines[1:]:
@@ -167,18 +116,15 @@ def document_is_non_current(source: Path) -> bool:
         key, separator, value = line.partition(":")
         if separator and key.strip().casefold() == "status":
             status = value.strip().strip("\"'").casefold()
-            return status in NON_CURRENT_DOCUMENT_STATUSES
+            return status in NON_CURRENT_STATUSES
     return False
 
 
 def normalize_token(token: str) -> str:
-    normalized = token.strip().strip(LEADING_PUNCTUATION)
-    normalized = normalized.rstrip(TRAILING_PUNCTUATION)
+    normalized = token.strip().strip("([{").rstrip(".,;:)]}")
     normalized = normalized.split("::", 1)[0]
     normalized = re.sub(r":\d+(?:-\d+)?$", "", normalized)
-    if "#" in normalized:
-        normalized = normalized.split("#", 1)[0]
-    return normalized
+    return normalized.split("#", 1)[0]
 
 
 def candidate_tokens(code_span: str) -> list[str]:
@@ -186,75 +132,56 @@ def candidate_tokens(code_span: str) -> list[str]:
         tokens = shlex.split(code_span)
     except ValueError:
         tokens = code_span.split()
-
-    candidates: list[str] = []
+    found: list[str] = []
     for token in tokens:
         for fragment in token.split(","):
             normalized = normalize_token(fragment)
-            if normalized and normalized not in candidates:
-                candidates.append(normalized)
-    return candidates
+            if normalized and normalized not in found:
+                found.append(normalized)
+    return found
 
 
-def resolve_reference(token: str, source: Path, root: Path) -> tuple[Path, bool] | None:
-    if not token or token.startswith(("http://", "https://", "mailto:", "#")):
-        return None
-    if any(
-        marker in token
-        for marker in ("*", "?", "{", "}", "<", ">", "$", "|", "...", "…")
-    ):
-        return None
-    if token.startswith("-") or token in {".", "..", "/"}:
-        return None
+def is_path_like(token: str) -> bool:
+    return bool(token) and not (
+        token.startswith(("http://", "https://", "mailto:", "-"))
+        or token in {".", "..", "/"}
+        or any(marker in token for marker in SKIP_MARKERS))
 
-    requires_executable = token.startswith("./")
-    if token.startswith("./"):
-        root_relative = token[2:]
-        if not root_relative.startswith(ROOT_PATH_PREFIXES):
-            return None
-        return (root / root_relative).resolve(), requires_executable
 
-    if token.startswith("../"):
-        return (source.parent / token).resolve(), requires_executable
-
-    if token.startswith(ROOT_PATH_PREFIXES):
-        local_candidate = (source.parent / token).resolve()
-        if local_candidate.exists():
-            return local_candidate, requires_executable
-        root_candidate = (root / token).resolve()
-        if root_candidate.exists():
-            return root_candidate, requires_executable
-        if re.fullmatch(r"\.specs/\d{3}", token):
-            matches = list(root.glob(f"{token}-*"))
-            if len(matches) == 1:
-                return matches[0].resolve(), requires_executable
-        if token.startswith(".") or token.endswith("/") or Path(token).suffix:
-            return root_candidate, requires_executable
-        return None
-
-    if token in BARE_REFERENCE_FILES:
-        local_candidate = (source.parent / token).resolve()
-        if local_candidate.exists():
-            return local_candidate, requires_executable
-        if token == "CONSTITUTION.md":
-            specification_constitution = root / ".specs" / token
-            if specification_constitution.exists():
-                return specification_constitution.resolve(), requires_executable
-        root_candidate = (root / token).resolve()
-        if root_candidate.exists():
-            return root_candidate, requires_executable
-        return None
-
+def resolve_prefixed(token: str, source: Path, root: Path) -> Path | None:
+    local = (source.parent / token).resolve()
+    if local.exists():
+        return local
+    package = re.fullmatch(r"\.spec/(\d{3})/?", token)
+    if package:
+        matches = list((root / SPEC_DIR).glob(f"{package.group(1)}-*"))
+        if len(matches) == 1:
+            return matches[0].resolve()
+    if token.endswith("/") or Path(token).suffix:
+        return (root / token).resolve()
     return None
 
 
-def line_is_non_current(
-    line: str, pending_task: bool, paragraph_non_current: bool
-) -> bool:
-    if pending_task or paragraph_non_current:
-        return True
-    lowered = line.casefold()
-    return any(marker in lowered for marker in NON_CURRENT_MARKERS)
+def resolve_reference(token: str, source: Path, root: Path,
+                      prefixes: tuple[str, ...]) -> tuple[Path, bool] | None:
+    """Return (target, must_be_executable) or None when not a path."""
+    if not is_path_like(token):
+        return None
+    if token.startswith("./"):
+        relative = token[2:]
+        if not relative.startswith(prefixes):
+            return None
+        return (root / relative).resolve(), True
+    if token.startswith("../"):
+        return (source.parent / token).resolve(), False
+    if token.startswith(prefixes):
+        target = resolve_prefixed(token, source, root)
+        return (target, False) if target else None
+    if token in BARE_FILES:
+        local = (source.parent / token).resolve()
+        return (local if local.exists() else (root / token).resolve(),
+                False)
+    return None
 
 
 @dataclass(frozen=True)
@@ -265,139 +192,76 @@ class LineReference:
     requires_executable: bool
 
 
-def iter_line_references(source: Path, root: Path):
-    """Yield every resolvable command/path token named in ``source``.
-
-    Shared by ``validate_file`` (which additionally checks each resolved
-    target against disk) and ``extract_references`` (which only needs the
-    set of named tokens). Applies the same fence, task, and non-current
-    marker filtering so both callers see an identical reference surface.
-    """
-    in_fence = False
-    pending_task = False
-    paragraph_non_current = False
-
-    for line_number, line in enumerate(
-        source.read_text(encoding="utf-8").splitlines(), start=1
-    ):
-        if not line.strip():
-            paragraph_non_current = False
-            continue
-        if FENCE_PATTERN.match(line):
+def current_lines(text: str) -> Iterator[tuple[int, str]]:
+    """Yield lines that state current facts (see module docstring)."""
+    in_fence = pending_task = non_current = False
+    for number, line in enumerate(text.splitlines(), start=1):
+        if FENCE.match(line):
             in_fence = not in_fence
             continue
         if in_fence:
             continue
-
-        task_match = TASK_PATTERN.match(line)
-        if task_match:
-            pending_task = task_match.group("state") == " "
-        elif HEADING_PATTERN.match(line):
-            pending_task = False
-            paragraph_non_current = False
-
-        line_has_non_current_marker = any(
-            marker in line.casefold() for marker in NON_CURRENT_MARKERS
-        )
-        if line_has_non_current_marker:
-            paragraph_non_current = True
-
-        if line_is_non_current(line, pending_task, paragraph_non_current):
+        if not line.strip():
+            non_current = False
             continue
-
-        for code_span in INLINE_CODE_PATTERN.findall(line):
-            for token in candidate_tokens(code_span):
-                resolved = resolve_reference(token, source, root)
-                if resolved is None:
-                    continue
-                target, requires_executable = resolved
-                yield LineReference(line_number, token, target, requires_executable)
-
-
-def extract_references(source: Path, root: Path | None = None) -> set[str]:
-    """Return every resolvable command/path token named in ``source``.
-
-    Reuses the fence/non-current-marker/candidate-token scan shared with
-    ``validate_file`` via ``iter_line_references``, but reports the named
-    tokens themselves rather than unresolved-target findings.
-    """
-    if document_is_non_current(source):
-        return set()
-    effective_root = root if root is not None else source.parent
-    return {
-        reference.token
-        for reference in iter_line_references(source, effective_root)
-    }
+        task = TASK.match(line)
+        if task:
+            pending_task = task.group("state") == " "
+        elif HEADING.match(line):
+            pending_task = non_current = False
+        folded = line.casefold()
+        non_current = non_current or any(
+            marker in folded for marker in NON_CURRENT_MARKERS)
+        if not (pending_task or non_current):
+            yield number, line
 
 
-def validate_file(source: Path, root: Path) -> list[Finding]:
-    if document_is_non_current(source):
+def iter_references(source: Path, root: Path, prefixes: tuple[str, ...],
+                    text: str) -> Iterator[LineReference]:
+    for number, line in current_lines(text):
+        tokens = (token for span in INLINE_CODE.findall(line)
+                  for token in candidate_tokens(span))
+        for token in tokens:
+            resolved = resolve_reference(token, source, root, prefixes)
+            if resolved is not None:
+                yield LineReference(number, token, *resolved)
+
+
+def validate_file(source: Path, root: Path,
+                  prefixes: tuple[str, ...]) -> list[Finding]:
+    text = source.read_text(encoding="utf-8")
+    if document_is_non_current(text):
         return []
-
     findings: list[Finding] = []
-
-    for reference in iter_line_references(source, root):
-        target = reference.target
-        if not target.exists():
+    for ref in iter_references(source, root, prefixes, text):
+        if not ref.target.exists():
             findings.append(
-                Finding(source, reference.line, reference.token, "target-not-found")
-            )
-        elif reference.requires_executable and target.is_file():
-            if target.stat().st_mode & 0o111 == 0:
-                findings.append(
-                    Finding(source, reference.line, reference.token, "not-executable")
-                )
-
+                Finding(source, ref.line, ref.token, "target-not-found"))
+        elif (ref.requires_executable and ref.target.is_file()
+              and not ref.target.stat().st_mode & 0o111):
+            findings.append(
+                Finding(source, ref.line, ref.token, "not-executable"))
     return findings
 
 
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Validate repository paths and commands named in Markdown."
-    )
-    parser.add_argument(
-        "paths",
-        nargs="*",
-        type=Path,
-        help="Markdown files or directories to scan; defaults to the repository root.",
-    )
-    parser.add_argument(
-        "--root",
-        type=Path,
-        default=Path(__file__).resolve().parents[1],
-        help="Repository root used to resolve root-relative references.",
-    )
-    parser.add_argument(
-        "--include-specs",
-        action="store_true",
-        help="Include `.specs/` in an advisory audit of future path declarations.",
-    )
-    return parser.parse_args()
-
-
-def main() -> int:
-    args = parse_args()
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("paths", nargs="*", type=Path,
+                        help="Markdown files or directories (default: root)")
+    parser.add_argument("--root", type=Path, default=ROOT)
+    parser.add_argument("--include-specs", action="store_true",
+                        help="also audit .spec/ (advisory)")
+    args = parser.parse_args(argv)
     root = args.root.resolve()
-    paths = args.paths or [root]
-    files = markdown_files(root, paths, args.include_specs)
-    findings = [
-        finding
-        for source in files
-        for finding in validate_file(source, root)
-    ]
-
+    prefixes = root_prefixes(root)
+    files = markdown_files(root, args.paths or [root], args.include_specs)
+    findings = [f for source in files
+                for f in validate_file(source, root, prefixes)]
     for finding in findings:
-        relative_source = finding.source.relative_to(root)
-        print(
-            f"{relative_source}:{finding.line}: {finding.reason}: "
-            f"{finding.reference}",
-            file=sys.stderr,
-        )
-
-    print(
-        f"Documentation references: files {len(files)} "
-        f"errors {len(findings)}"
-    )
+        print(f"{finding.source.relative_to(root)}:{finding.line}: "
+              f"{finding.reason}: {finding.reference}", file=sys.stderr)
+    print(f"Documentation references: files {len(files)} "
+          f"errors {len(findings)}")
     return 1 if findings else 0
 
 
