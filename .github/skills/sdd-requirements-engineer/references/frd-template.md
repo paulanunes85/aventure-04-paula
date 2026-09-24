@@ -1,6 +1,6 @@
 # Modelo de Documento de Requisitos Funcionais (FRD)
 
-Use este modelo após a análise de lacunas. Declarações normativas seguem a [notação EARS](./ears-notation.md). Mantenha o documento como `Rascunho` ou `Pronto para revisão` até um revisor responsável registrar a aprovação. Em projetos que usam só `spec.md`, estas seções podem ser incorporadas diretamente à especificação.
+Grave este modelo completo em `.spec/<NNN>-<funcionalidade>/frd.md` após a análise de lacunas. Todas as seções são obrigatórias; seções sem conteúdo ficam `NÃO APLICÁVEL: <motivo>`. A declaração EARS, o aceite e a verificação de cada requisito vivem apenas em [spec.md](./spec-templates.md#specification-specmd); o FRD referencia os IDs e acrescenta domínio, atores, justificativa, dependências e falha e recuperação. Mantenha o documento como `Rascunho` ou `Pronto para revisão` até um revisor responsável registrar a aprovação.
 
 ```markdown
 ---
@@ -10,7 +10,8 @@ date: "<AAAA-MM-DD>"
 version: "0.1.0"
 status: "Rascunho"
 project_context: "<greenfield|brownfield|modernização|migração|api|mobile|dados|saas|ferramenta-interna|cli|educacional|infraestrutura>"
-companion_nfrd: "<caminho relativo ou não-criado>"
+companion_nfrd: "nfrd.md"
+spec: "spec.md"
 ---
 
 # Documento de Requisitos Funcionais: <Projeto ou Funcionalidade>
@@ -68,28 +69,15 @@ companion_nfrd: "<caminho relativo ou não-criado>"
 
 <Adicione um diagrama de estados Mermaid quando uma entidade tiver ciclo de vida. Caso contrário, declare "Nenhuma entidade dependente de ciclo de vida identificada.">
 
-## 6. Requisitos funcionais
+## 6. Requisitos funcionais por domínio
 
-### REQ-001: <Título curto>
-origem: <SRC-### ou [GREENFIELD] justificativa>
+A declaração EARS canônica, o aceite e a verificação de cada ID estão em [spec.md](spec.md). Não copie nem reescreva a declaração aqui.
 
-- Domínio: <domínio>
-- Padrão: <padrão EARS>
-- Prioridade: <P0|P1|P2|P3>
-- Status: Proposto
-- Justificativa: <por que o comportamento é necessário>
-- Dependências: <IDs de requisitos ou nenhuma>
+### Domínio: <nome do domínio>
 
-> <Declaração EARS canônica com uma resposta observável.>
-
-**Sinais de aceite**
-- AC-REQ-001-01: Dado <contexto>, Quando <ação>, Então <resultado observável>
-
-**Verificação**
-- <teste|inspeção|análise|demonstração>: <evidência planejada>
-
-**Falha e recuperação**
-- <IDs de requisitos de comportamento indesejado vinculados ou não aplicável>
+| ID | Título | Justificativa | Dependências | Falha e recuperação | Atores |
+| --- | --- | --- | --- | --- | --- |
+| REQ-001 | <título curto> | <por que o comportamento é necessário> | <IDs ou nenhuma> | <IDs de requisitos indesejados vinculados ou NÃO APLICÁVEL> | <papéis> |
 
 <Repita por domínio. Não organize requisitos por tela de interface nem por camada de implementação.>
 
@@ -136,6 +124,8 @@ origem: <SRC-### ou [GREENFIELD] justificativa>
 - Todo requisito P0 tem justificativa de impacto na entrega.
 - Comportamento de erro e recuperação está explícito para cada ação principal.
 - Requisitos permanecem neutros quanto à implementação e atômicos.
-- As linhas do resumo correspondem exatamente aos registros normativos.
+- As linhas do resumo correspondem exatamente aos registros normativos de `spec.md` (IDs, padrão, prioridade, fonte e status).
+- Todo `REQ-NNN` ativo de `spec.md` aparece na seção 6 e no resumo, e nenhuma declaração EARS foi copiada.
+- Toda seção está presente; seções sem conteúdo declaram `NÃO APLICÁVEL` com motivo.
 - IDs removidos têm disposição registrada, mesmo que o motivo seja "desconhecido".
 - O status de aprovação não vem preenchido.

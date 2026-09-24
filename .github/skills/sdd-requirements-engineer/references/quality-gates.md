@@ -2,7 +2,7 @@
 
 Aplique toda verificação relevante. Marque cada uma como `APROVADO`, `REPROVADO`, `BLOQUEADO` ou `NÃO APLICÁVEL` e cite o artefato, ID de requisito, ID de fonte ou evidência usada. Um pacote só passa quando nenhuma verificação aplicável está reprovada ou bloqueada.
 
-Os nomes em maiúsculas (`SPECIFICATION.md`, `DESIGN.md`, `TASKS.md` etc.) identificam responsabilidades descritas nos [modelos de artefatos](spec-templates.md). No layout padrão elas vivem dentro de `spec.md`, `plan.md` e `tasks.md`.
+Os nomes em maiúsculas (`SPECIFICATION`, `DESIGN`, `TASKS` etc.) identificam responsabilidades descritas nos [modelos de artefatos](spec-templates.md). Elas vivem em `.spec/<NNN>-<funcionalidade>/frd.md`, `nfrd.md`, `spec.md`, `plan.md` e `tasks.md`, conforme a política de artefatos.
 
 ## G1. Escopo e evidência
 
@@ -59,7 +59,7 @@ Os nomes em maiúsculas (`SPECIFICATION.md`, `DESIGN.md`, `TASKS.md` etc.) ident
 
 ## G5. Integridade dos artefatos SDD
 
-- [ ] G5.01 A constituição do repositório é reutilizada ou existe um artefato governante justificado.
+- [ ] G5.01 `CONSTITUTION.md` é reutilizada ou foi criada em `Rascunho` com princípios que citam fonte.
 - [ ] G5.02 A especificação contém os requisitos ativos canônicos.
 - [ ] G5.03 A análise registra evidências, lacunas, riscos e alternativas.
 - [ ] G5.04 O design cobre arquitetura, dados, interfaces, segurança, falhas e trade-offs exigidos pelo escopo.
@@ -68,10 +68,11 @@ Os nomes em maiúsculas (`SPECIFICATION.md`, `DESIGN.md`, `TASKS.md` etc.) ident
 - [ ] G5.07 Toda tarefa `[P]` é independente em dependências e em superfície de mudança.
 - [ ] G5.08 O checklist contém gates de revisão, implementação, verificação e release aplicáveis ao escopo.
 - [ ] G5.09 As decisões registram escolhas relevantes, alternativas, consequências, evidências e gatilhos de revisão.
-- [ ] G5.10 Artefatos opcionais existem somente quando convenções do repositório ou risco os justificam.
+- [ ] G5.10 Todo arquivo do pacote da etapa existe em `.spec/<NNN>-<funcionalidade>/` com todas as seções do modelo; seções sem conteúdo declaram `NÃO APLICÁVEL` com motivo, e artefatos adicionais existem somente quando o risco ou a automação os justificam.
 - [ ] G5.11 Todo tipo de Mermaid usa o tema claro universal; diagramas tipo grafo carregam as classes canônicas default/zone/external e tipos não estilizáveis não contêm `classDef`.
 - [ ] G5.12 O design inclui uma visão de entrega que mapeia requisitos por componentes, tarefas/plano, dependências, testes/evidências e estado atual versus alvo.
 - [ ] G5.13 Toda tarefa tem checkbox, marcador de sequência, mapeamento de plano, rastreio de requisito e superfície de mudança; o DAG cobre todas as tarefas e as tarefas marcadas correspondem ao registro de verificação.
+- [ ] G5.14 `frd.md` e `nfrd.md` referenciam os IDs de `spec.md` sem copiar nem redefinir declarações EARS, e seus resumos e contagens concordam com `spec.md`.
 
 ## G6. Rastreabilidade e ciclo de vida
 

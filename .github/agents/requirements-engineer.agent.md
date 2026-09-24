@@ -85,12 +85,10 @@ Esses fatos devem vir da investigação do time e dos artefatos existentes. Nunc
 
 Escreva e valide requisitos diretamente com as skills SDD/TDD e as instruções aplicáveis, sem exigir CLI, scaffold gerado ou comandos de barra.
 
-Use o modo `Requisitos` para escrever, `Validação` para revisar e `Handoff` apenas para escopo aprovado. Mantenha `specs/<NNN>-<funcionalidade>/spec.md`, os IDs e a linha `origem:`; mantenha o registro de fontes e a rastreabilidade no artefato solicitado. Não gere FRD/NFRD paralelos nem o pacote completo para um pedido apenas de requisitos.
+Use o modo `Requisitos` para escrever, `Validação` para revisar e `Handoff` apenas para escopo aprovado. No modo `Requisitos`, grave `frd.md`, `nfrd.md` e `spec.md` completos em `.spec/<NNN>-<funcionalidade>/` (e `CONSTITUTION.md`, se ausente), com todas as seções dos modelos da skill; `plan.md` e `tasks.md` pertencem ao `@software-architect`. A declaração EARS, os IDs e a linha `origem:` vivem só em `spec.md`; `frd.md` e `nfrd.md` referenciam por ID.
 
-1. **Escrever** os requisitos EARS em escopo, as fontes primárias e os critérios de aceite em `specs/<NNN>-<funcionalidade>/spec.md`.
+1. **Escrever** os requisitos EARS em escopo, as fontes primárias e os critérios de aceite em `.spec/<NNN>-<funcionalidade>/spec.md`, e o FRD e o NFRD completos no mesmo diretório.
 2. **Esclarecer** ambiguidades com o revisor responsável, preservando perguntas não confirmadas e bloqueios.
 3. **Validar** cada requisito contra a evidência, a governança do repositório e os quality gates aplicáveis antes do handoff.
 
-Se o time usa o [Spec-Kit](https://github.com/github/spec-kit), esses passos correspondem a `/speckit.specify`, `/speckit.clarify` e `/speckit.analyze`. Ferramentas opcionais ausentes não são bloqueio.
-
-Antes de reportar validação, verifique se cada validador existe, se aplica a `specs/` e pode rodar com as ferramentas disponíveis. Com apenas leitura/busca/edição, reporte os comandos como não executados e liste as verificações aplicáveis para o time. Use o modelo de saída da skill SDD para distinguir achados de revisão, aprovação, verificação planejada e prontidão para implementação.
+Antes de reportar validação, verifique se cada validador existe, se aplica a `.spec/` e pode rodar com as ferramentas disponíveis. Com apenas leitura/busca/edição, reporte os comandos como não executados e liste as verificações aplicáveis para o time. Use o modelo de saída da skill SDD para distinguir achados de revisão, aprovação, verificação planejada e prontidão para implementação.

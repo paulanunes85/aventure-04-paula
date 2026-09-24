@@ -1,6 +1,6 @@
 ---
 name: "write-ears-spec"
-description: "Escreve requisitos EARS confirmados em specs/<NNN>-<funcionalidade>/spec.md com linha origem:, registro SRC-###, critérios Dado/Quando/Então e verificação planejada via TDD, sem inventar regras."
+description: "Escreve o pacote de requisitos completo em .spec/<NNN>-<funcionalidade>/ (frd.md, nfrd.md e spec.md, mais CONSTITUTION.md se ausente) com requisitos EARS confirmados, linha origem:, registro SRC-###, critérios Dado/Quando/Então e verificação planejada via TDD, sem inventar regras."
 argument-hint: "feature=NNN-nome-da-funcionalidade fonte=requisitos/requisitos.md"
 agent: "requirements-engineer"
 tools: ["read", "search", "edit"]
@@ -9,7 +9,7 @@ tools: ["read", "search", "edit"]
 
 ## Objetivo
 
-Transformar apenas regras confirmadas da fonte em requisitos EARS formais em `specs/<NNN>-<funcionalidade>/spec.md`. Perguntas em aberto continuam perguntas; não preencha requisitos, critérios ou arquitetura com suposições.
+Transformar apenas regras confirmadas da fonte em requisitos EARS formais em `.spec/<NNN>-<funcionalidade>/spec.md` e gravar, no mesmo diretório, `frd.md` e `nfrd.md` completos. Se o repositório não tiver `CONSTITUTION.md`, criar a constituição em `Rascunho`. Perguntas em aberto continuam perguntas; não preencha requisitos, critérios ou arquitetura com suposições.
 
 ## Quando invocar
 
@@ -21,7 +21,7 @@ Na Etapa 2 (especificação), depois que o time escolheu a funcionalidade e, opc
 ## Pré-condições
 
 - O documento de origem existe e foi lido pelo time
-- O time identificou `specs/<NNN>-<funcionalidade>/`
+- O time identificou `.spec/<NNN>-<funcionalidade>/`
 - As regras em escopo foram confirmadas pelo Product Owner (ou estão explícitas na fonte)
 
 ## Entradas que o time deve fornecer
@@ -42,13 +42,16 @@ Na Etapa 2 (especificação), depois que o time escolheu a funcionalidade e, opc
 - Escrever Dado/Quando/Então somente quando sustentado por evidência ou decisão de escopo
 - Preservar perguntas não resolvidas com todos os campos
 - Manter registro de fontes e matriz de rastreabilidade e aplicar `Validação` antes da entrega
+- Gravar `frd.md` e `nfrd.md` com todas as seções dos modelos, referenciando os IDs de `spec.md` sem copiar declarações EARS
+- Criar `CONSTITUTION.md` em `Rascunho` quando ausente, com princípios derivados de fontes verificáveis
 
 ## O que NÃO vou fazer
 
 - Criar requisito sem `origem:` ou sem `[GREENFIELD]` justificado
 - Promover, responder ou mudar o status de premissas e perguntas
 - Exigir quantidade fixa de requisitos, diagramas, ADRs ou endpoints
-- Criar `.specs/`, mudar o esquema `REQ-NNN` ou gerar `plan.md`/`tasks.md` para este pedido
+- Criar especificação fora de `.spec/`, mudar o esquema `REQ-NNN` ou gerar `plan.md`/`tasks.md` para este pedido
+- Omitir seções dos modelos de FRD, NFRD ou `spec.md`; seções sem conteúdo ficam `NÃO APLICÁVEL` com motivo
 - Nomear tecnologia de implementação em requisito funcional
 - Escrever testes executáveis, código de produto ou commits, nem reportar verificação planejada como resultado observado
 
@@ -86,7 +89,7 @@ Mantenha no mesmo `spec.md` o registro de fontes e a matriz:
 
 ## Regras de SDD e rastreabilidade
 
-- As instruções SDD valem para `specs/**`; leia-as explicitamente antes de escrever para que evidência, atomicidade EARS, rastreabilidade e status governem a tarefa.
+- As instruções SDD valem para `.spec/**`; leia-as explicitamente antes de escrever para que evidência, atomicidade EARS, rastreabilidade e status governem a tarefa.
 - Use `deve` nas cláusulas normativas e as palavras-chave em português da referência EARS. Preserve significado e IDs ao normalizar requisitos existentes.
 - `SRC-###` complementa, mas não substitui, a linha `origem:` com caminho verificável.
 - Não invente prioridade, métrica, aprovação ou resultado de teste. Campos sem evidência ficam `PENDENTE` ou `BLOQUEADO`, com impacto e responsável; requisitos bloqueados não são apresentados como prontos.
@@ -97,6 +100,8 @@ Mantenha no mesmo `spec.md` o registro de fontes e a matriz:
 
 - [ ] SDD/TDD e as instruções aplicáveis foram carregados e aplicados em `Requisitos` e `Validação`, com TDD limitado ao aceite planejado
 - [ ] `spec.md` contém apenas requisitos da funcionalidade
+- [ ] `frd.md` e `nfrd.md` existem com todas as seções dos modelos, e seus resumos batem com `spec.md`
+- [ ] `CONSTITUTION.md` existe (reutilizada ou criada em `Rascunho`) e `spec.md` registra o caminho
 - [ ] Todo requisito tem resposta EARS observável com `deve`, metadados da skill, ID de aceite estável e `origem:` válida ou `[GREENFIELD]` justificado
 - [ ] Perguntas em aberto estão fora dos requisitos e mantêm seu status
 - [ ] A matriz liga cada REQ-ID à evidência revisada
@@ -108,7 +113,7 @@ Mantenha no mesmo `spec.md` o registro de fontes e a matriz:
 Você é `@requirements-engineer`. Promova regras confirmadas a requisitos EARS formais sem inventar evidência.
 
 **Passo 0 - Carregar SDD, TDD e instruções.**
-Antes de ler as entradas, leia as [instruções de artefatos SDD](../instructions/sdd-artifacts.instructions.md) e carregue as skills [sdd-requirements-engineer](../skills/sdd-requirements-engineer/SKILL.md) e [tdd-workflow](../skills/tdd-workflow/SKILL.md). Se o carregamento de skills não estiver disponível, leia cada `SKILL.md` diretamente. Leia as [instruções de testes](../instructions/tests.instructions.md) para planejar o aceite. Selecione `Requisitos` e leia a [referência EARS](../skills/sdd-requirements-engineer/references/ears-notation.md) e os [quality gates](../skills/sdd-requirements-engineer/references/quality-gates.md).
+Antes de ler as entradas, leia as [instruções de artefatos SDD](../instructions/sdd-artifacts.instructions.md) e carregue as skills [sdd-requirements-engineer](../skills/sdd-requirements-engineer/SKILL.md) e [tdd-workflow](../skills/tdd-workflow/SKILL.md). Se o carregamento de skills não estiver disponível, leia cada `SKILL.md` diretamente. Leia as [instruções de testes](../instructions/tests.instructions.md) para planejar o aceite. Selecione `Requisitos` e leia a [referência EARS](../skills/sdd-requirements-engineer/references/ears-notation.md), o [modelo de FRD](../skills/sdd-requirements-engineer/references/frd-template.md), o [modelo de NFRD](../skills/sdd-requirements-engineer/references/nfrd-template.md), os [modelos de artefatos SDD](../skills/sdd-requirements-engineer/references/spec-templates.md) e os [quality gates](../skills/sdd-requirements-engineer/references/quality-gates.md).
 
 **Passo 1 - Confirmar escopo.**
 Liste apenas regras **confirmadas** atribuídas à funcionalidade. Registre itens adiados em `Escopo e não objetivos`. Não inclua regras inferidas nem perguntas.
@@ -128,8 +133,11 @@ Copie itens não validados para `Premissas, bloqueios e perguntas em aberto`, co
 **Passo 6 - Montar a matriz.**
 Mantenha o registro de fontes e a tabela `REQ-ID | Padrão EARS | origem | SRC-ID | AC-ID | Verificação`. Confira os vínculos bidirecionais entre fontes, requisitos e aceite.
 
-**Passo 7 - Validar e gravar.**
-Aplique `Validação` aos gates de requisito e rastreabilidade. Registre cada resultado como `PASS`, `FAIL`, `BLOQUEADO` ou `NÃO APLICÁVEL`, com evidência ou motivo. Verifique se algum validador citado existe e cobre este artefato; com apenas leitura/busca/edição, reporte comandos como não executados. Grave `specs/<NNN>-<funcionalidade>/spec.md` como `Rascunho` ou `Pronto para revisão` e responda com o modelo de saída da skill SDD.
+**Passo 7 - Montar FRD, NFRD e constituição.**
+Preencha todas as seções de `frd.md` e `nfrd.md` a partir das mesmas fontes, referenciando os IDs de `spec.md` sem copiar declarações. Registre em `nfrd.md` a aplicabilidade de cada categoria e o envelope de medição de cada NFR. Se `CONSTITUTION.md` não existir, crie-a em `Rascunho` com princípios `CON-NNN` que citam sua fonte.
+
+**Passo 8 - Validar e gravar.**
+Aplique `Validação` aos gates de requisito e rastreabilidade. Registre cada resultado como `PASS`, `FAIL`, `BLOQUEADO` ou `NÃO APLICÁVEL`, com evidência ou motivo. Verifique se algum validador citado existe e cobre este artefato; com apenas leitura/busca/edição, reporte comandos como não executados. Grave `.spec/<NNN>-<funcionalidade>/frd.md`, `nfrd.md` e `spec.md` como `Rascunho` ou `Pronto para revisão` e responda com o modelo de saída da skill SDD.
 
 ## Exemplo de invocação
 
@@ -137,4 +145,4 @@ Aplique `Validação` aos gates de requisito e rastreabilidade. Registre cada re
 /write-ears-spec feature=001-sala-do-eco fonte=requisitos/requisitos.md
 ```
 
-Espere um `spec.md` com requisitos EARS sustentados por evidência, linha `origem:`, registro de fontes, matriz de rastreabilidade e perguntas em aberto preservadas.
+Espere `frd.md`, `nfrd.md` e `spec.md` completos em `.spec/001-sala-do-eco/`, com requisitos EARS sustentados por evidência, linha `origem:`, registro de fontes, matriz de rastreabilidade e perguntas em aberto preservadas.

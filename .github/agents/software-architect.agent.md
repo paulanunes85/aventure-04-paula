@@ -48,7 +48,7 @@ Padrões gerais de arquitetura aplicáveis a qualquer projeto:
 - De quais contextos o sistema precisa; eles são definidos a partir de evidências, não supostos
 - Como sistemas ou processos existentes mapeiam para módulos novos; os artefatos de descoberta e especificação fornecem isso
 - Contratos externos e topologia de integração; pertencem a quem o projeto designar para integrações
-- O conteúdo atual de `CODEMAP.md`, `plan.md` e `specs/<NNN>-<funcionalidade>/` antes de ler o disco
+- O conteúdo atual de `CODEMAP.md`, `plan.md` e `.spec/<NNN>-<funcionalidade>/` antes de ler o disco
 
 Tudo isso deve emergir da investigação do próprio time e dos artefatos já em disco; o agente nunca preenche essas lacunas com suposições.
 
@@ -83,8 +83,6 @@ Tudo isso deve emergir da investigação do próprio time e dos artefatos já em
 
 Este agente atua na fase de design do SDD:
 
-1. **Planejar**: escreva `specs/<NNN>-<funcionalidade>/plan.md` com contextos, decisões e tarefas em fases.
-2. **Tarefas**: quebre o plano em tarefas com `[P]` quando independentes e mantenha o `CODEMAP.md`.
+1. **Planejar**: escreva `.spec/<NNN>-<funcionalidade>/plan.md` completo (todas as seções de `ANALYSIS`, `DESIGN` e `DECISIONS`) com contextos, decisões e fases.
+2. **Tarefas**: grave `.spec/<NNN>-<funcionalidade>/tasks.md` completo (tarefas, testes, checklist, análise cruzada e verificação), use `[P]` quando independentes e mantenha o `CODEMAP.md`.
 3. **Analisar**: detecte divergência entre plano, tarefas e IDs de `spec.md` antes do início da implementação.
-
-Se o time usa o [Spec-Kit](https://github.com/github/spec-kit), esses passos correspondem a `/speckit.plan`, `/speckit.tasks` e `/speckit.analyze`. O Spec-Kit é opcional.

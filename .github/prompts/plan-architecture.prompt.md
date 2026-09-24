@@ -1,6 +1,6 @@
 ---
 name: "plan-architecture"
-description: "Escreve specs/<NNN>-<funcionalidade>/plan.md e mantém o CODEMAP.md a partir de uma spec pronta: estilo arquitetural proporcional, contextos por evidência, contratos, estratégia de testes, rastreio REQ-componente e ADRs só quando necessários."
+description: "Escreve .spec/<NNN>-<funcionalidade>/plan.md completo e mantém o CODEMAP.md a partir de uma spec pronta: análise, todas as seções do portfólio de design, contextos por evidência, contratos, estratégia de testes, rastreio REQ-componente e ADRs para decisões estruturais."
 argument-hint: "feature=NNN-nome-da-funcionalidade"
 agent: "software-architect"
 tools: ["read", "search", "edit"]
@@ -20,7 +20,7 @@ Na Etapa 3 (design), depois que `/validate-spec` deixou a especificação `Pront
 
 ## Pré-condições
 
-- `specs/<NNN>-<funcionalidade>/spec.md` está `Pronto para revisão` ou `Aprovado` com evidência
+- `.spec/<NNN>-<funcionalidade>/spec.md` está `Pronto para revisão` ou `Aprovado` com evidência, e `frd.md`/`nfrd.md` existem
 - Stack, frameworks e comandos estão preenchidos em [copilot-instructions.md](../copilot-instructions.md)
 - `docs/ux/<funcionalidade>-*.md` existe quando a funcionalidade tem interface
 
@@ -48,11 +48,11 @@ Na Etapa 3 (design), depois que `/validate-spec` deixou a especificação `Pront
 - Organizar a raiz por camada técnica (`controller / service / repository`)
 - Alterar requisitos de `spec.md`; lacunas voltam ao `@requirements-engineer`
 - Criar `tasks.md`, código ou testes
-- Produzir diagramas para cumprir cota
+- Produzir diagramas sem fonte ou omitir seções do modelo; seções sem conteúdo ficam `NÃO APLICÁVEL` com motivo
 
 ## Formato de saída
 
-Siga a seção `DESIGN (plan.md)` dos [modelos de artefatos SDD](../skills/sdd-requirements-engineer/references/spec-templates.md), incluindo somente as seções que esclarecem decisões desta funcionalidade. A rastreabilidade é obrigatória:
+Siga as seções `ANALYSIS` e `DESIGN (plan.md)` dos [modelos de artefatos SDD](../skills/sdd-requirements-engineer/references/spec-templates.md) e inclua todas elas, na ordem do modelo; seções sem conteúdo ficam `NÃO APLICÁVEL: <motivo>`. A rastreabilidade é obrigatória:
 
 ```markdown
 ## Visão de entrega e rastreabilidade
@@ -72,9 +72,9 @@ Siga a seção `DESIGN (plan.md)` dos [modelos de artefatos SDD](../skills/sdd-r
 
 ## Regras de SDD e rastreabilidade
 
-- Leia as instruções SDD antes de editar `specs/**` e `docs/adr/**`.
+- Leia as instruções SDD antes de editar `.spec/**` e `docs/adr/**`.
 - Todo requisito ativo aparece em `plan.md`; componente sem requisito é órfão e deve ser removido ou justificado.
-- Diagramas Mermaid usam o tema claro universal e as classes canônicas do padrão; inclua apenas visões que esclareçam uma decisão.
+- Diagramas Mermaid usam o tema claro universal e as classes canônicas do padrão; contexto, implantação, estados, sequências e fluxo de dados levam diagrama quando aplicáveis.
 - Prioridades de decisão: estabilidade de contrato > elegância; observabilidade > abstração; simplicidade operacional > completude; escolha a opção mais fácil de reverter.
 - Nenhum import cruza fronteira de contexto sem interface pública justificada.
 - Status do plano: `Planejado`. ADRs novos ficam `Proposto` até aprovação humana.
@@ -82,6 +82,7 @@ Siga a seção `DESIGN (plan.md)` dos [modelos de artefatos SDD](../skills/sdd-r
 ## Definição de pronto
 
 - [ ] Skill, instruções e padrão de documentos foram carregados antes da escrita
+- [ ] `plan.md` tem todas as seções de `ANALYSIS` e `DESIGN`, com `NÃO APLICÁVEL` justificado onde couber
 - [ ] O estilo arquitetural é proporcional e justificado
 - [ ] Contextos e módulos têm evidência de coesão e acoplamento
 - [ ] Todo requisito ativo está mapeado a componente, teste previsto e estado
@@ -97,7 +98,7 @@ Você é `@software-architect`. Desenhe a estrutura interna da funcionalidade a 
 Leia as [instruções de artefatos SDD](../instructions/sdd-artifacts.instructions.md), o [padrão de documentos SDD e Mermaid](../skills/sdd-requirements-engineer/references/sdd-document-and-mermaid-standard.md), os [modelos de artefatos SDD](../skills/sdd-requirements-engineer/references/spec-templates.md) e o [copilot-instructions.md](../copilot-instructions.md), e carregue a skill [sdd-requirements-engineer](../skills/sdd-requirements-engineer/SKILL.md). Se a stack ou os comandos ainda estiverem como marcadores `<...>`, pare e pergunte ao time.
 
 **Passo 1 - Ler os insumos.**
-Leia `spec.md`, `docs/ux/` da funcionalidade, ADRs, `CODEMAP.md` e o código existente relevante. Liste requisitos em escopo, NFRs e bloqueios. Requisito bloqueado não entra no design como decidido.
+Leia `spec.md`, `frd.md`, `nfrd.md`, `docs/ux/` da funcionalidade, ADRs, `CODEMAP.md` e o código existente relevante. Liste requisitos em escopo, NFRs e bloqueios. Requisito bloqueado não entra no design como decidido.
 
 **Passo 2 - Escolher o estilo.**
 Classifique o contexto (por exemplo, ferramenta CLI, web, educacional) e escolha o estilo mais simples que atende. Justifique cada camada pelo custo que ela evita. Se houver mais de uma interface prevista (CLI e web), avalie separar núcleo de domínio e entrega.

@@ -1,6 +1,6 @@
 ---
 name: "implement-task"
-description: "Implementa uma única tarefa de specs/<NNN>-<funcionalidade>/tasks.md com TDD red-green-refactor, comentários REQ-NNN, gates do projeto executados e evidência datada no registro de execução."
+description: "Implementa uma única tarefa de .spec/<NNN>-<funcionalidade>/tasks.md com TDD red-green-refactor, comentários REQ-NNN, gates do projeto executados e evidência datada no registro de execução."
 argument-hint: "feature=NNN-nome-da-funcionalidade tarefa=T001[,T002]"
 agent: "implementer"
 tools: ["read", "search", "edit", "execute"]

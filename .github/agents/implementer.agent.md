@@ -44,7 +44,7 @@ Padrões gerais de implementação, independentes de stack:
 
 ## O que este agente NÃO sabe
 
-- O que os requisitos EARS do time dizem; leia `specs/<NNN>-<funcionalidade>/spec.md` e `tasks.md`
+- O que os requisitos EARS do time dizem; leia `.spec/<NNN>-<funcionalidade>/spec.md` e `tasks.md`
 - Quais módulos, serviços ou endpoints a funcionalidade precisa; isso vem de `plan.md` e do `CODEMAP.md`, se existirem
 - O que um sistema existente ou legado realmente faz; os artefatos de descoberta e a fonte citada em `origem:` fornecem isso
 - O conteúdo atual do código, migrações e constituição até que sejam lidos do disco
@@ -84,8 +84,6 @@ Tudo isso deve emergir da investigação do próprio time e dos artefatos já em
 
 Este agente executa a fase de construção do SDD:
 
-1. **Selecionar**: use `specs/<NNN>-<funcionalidade>/tasks.md` e `plan.md` para escolher uma tarefa em escopo cujas dependências estejam concluídas.
+1. **Selecionar**: use `.spec/<NNN>-<funcionalidade>/tasks.md` e `plan.md` para escolher uma tarefa em escopo cujas dependências estejam concluídas.
 2. **Implementar**: execute a tarefa com testes, mantendo cada mudança rastreável a um ID em `spec.md`.
 3. **Analisar**: confirme que a mudança respeita a constituição e as instruções do repositório e sinalize quando for necessária intervenção humana.
-
-Se o time usa o [Spec-Kit](https://github.com/github/spec-kit), esses passos correspondem a `/speckit.tasks`, `/speckit.implement` e `/speckit.analyze`. O Spec-Kit é opcional; sua ausência não bloqueia o fluxo.

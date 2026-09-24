@@ -1,6 +1,6 @@
 ---
 name: "validate-spec"
-description: "Revisa specs/<NNN>-<funcionalidade>/spec.md contra EARS, linha origem:, contradições e quality gates; esclarece bloqueios com o Product Owner e decide se a especificação fica Pronto para revisão, sem aprovar em nome de humanos."
+description: "Revisa .spec/<NNN>-<funcionalidade>/spec.md, frd.md e nfrd.md contra EARS, linha origem:, completude dos modelos, contradições e quality gates; esclarece bloqueios com o Product Owner e decide se a especificação fica Pronto para revisão, sem aprovar em nome de humanos."
 argument-hint: "feature=NNN-nome-da-funcionalidade"
 agent: "requirements-engineer"
 tools: ["read", "search", "edit"]
@@ -20,7 +20,7 @@ Ao fim da Etapa 2, depois de `/write-ears-spec` (e de `/research-ux`, quando hou
 
 ## Pré-condições
 
-- `specs/<NNN>-<funcionalidade>/spec.md` existe
+- `.spec/<NNN>-<funcionalidade>/spec.md` existe (e `frd.md`/`nfrd.md`; se faltarem, o achado é registrado e o arquivo volta para `/write-ears-spec`)
 - As fontes citadas nas linhas `origem:` estão acessíveis no repositório
 - O Product Owner (ou revisor responsável) está disponível para responder bloqueios
 
@@ -34,6 +34,7 @@ Ao fim da Etapa 2, depois de `/write-ears-spec` (e de `/research-ux`, quando hou
 
 - Carregar SDD/TDD e as instruções aplicáveis e usar o modo `Validação`
 - Conferir cada requisito contra o contrato EARS, a linha `origem:` e a fonte citada
+- Conferir que `frd.md` e `nfrd.md` têm todas as seções dos modelos, referenciam os IDs de `spec.md` sem redefini-los e têm resumos e contagens coerentes
 - Detectar requisitos compostos, termos vagos, tecnologia em requisito funcional, NFR sem envelope de medição e contradições entre fontes
 - Fazer no máximo três perguntas sobre bloqueios, uma por vez, ao Product Owner
 - Corrigir apenas defeitos de forma (redação EARS, metadado com evidência, ID de aceite ausente), preservando ID e significado
@@ -61,7 +62,7 @@ Severidades: `Bloqueio` (impede design), `Alta` (requisito não verificável), `
 
 ## Regras de SDD e rastreabilidade
 
-- Leia as instruções SDD antes de editar `specs/**`; elas governam evidência, atomicidade, rastreio e status.
+- Leia as instruções SDD antes de editar `.spec/**`; elas governam evidência, atomicidade, rastreio e status.
 - Divisão, fusão ou aposentadoria de requisito exige linha em `Disposições históricas`.
 - Uma resposta do Product Owner vira fonte: registre-a em `Registro de fontes` e cite-a na `origem:` do requisito afetado.
 - `Pronto para revisão` exige zero bloqueios abertos em requisitos P0; caso contrário, a especificação fica `Rascunho` com bloqueios listados.
@@ -84,7 +85,7 @@ Você é `@requirements-engineer`. Valide a especificação sem alterar seu sign
 Leia as [instruções de artefatos SDD](../instructions/sdd-artifacts.instructions.md) e carregue as skills [sdd-requirements-engineer](../skills/sdd-requirements-engineer/SKILL.md) e [tdd-workflow](../skills/tdd-workflow/SKILL.md). Selecione `Validação` e leia os [quality gates](../skills/sdd-requirements-engineer/references/quality-gates.md), o [catálogo de antipadrões](../skills/sdd-requirements-engineer/references/anti-patterns.md) e a [referência EARS](../skills/sdd-requirements-engineer/references/ears-notation.md).
 
 **Passo 1 - Inventariar.**
-Leia `spec.md` inteiro. Liste requisitos, fontes, critérios, perguntas e disposições. Abra cada fonte citada e confirme seção e linhas.
+Leia `spec.md`, `frd.md` e `nfrd.md` inteiros. Liste requisitos, fontes, critérios, perguntas e disposições. Abra cada fonte citada e confirme seção e linhas.
 
 **Passo 2 - Aplicar os gates.**
 Para cada requisito, verifique padrão EARS, resposta única e observável, `deve`, neutralidade tecnológica, prioridade justificada, `origem:` válida, aceite Dado/Quando/Então e verificação planejada. Para NFRs, verifique o envelope de medição.

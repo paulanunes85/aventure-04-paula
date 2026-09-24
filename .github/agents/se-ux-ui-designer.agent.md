@@ -100,8 +100,8 @@ Ordem de teclado, anúncios de leitor de tela, contraste, foco e alvos de toque
 
 Este agente trabalha antes da fase de construção; sua pesquisa alimenta a especificação, não o código:
 
-1. **Especificar**: declarações de necessidade e jornadas guiam os requisitos voltados ao usuário em `specs/<NNN>-<funcionalidade>/spec.md`.
+1. **Especificar**: declarações de necessidade e jornadas guiam os requisitos voltados ao usuário em `.spec/<NNN>-<funcionalidade>/spec.md`.
 2. **Planejar**: a especificação de fluxo e o contrato de acessibilidade moldam as partes de UI do `plan.md`.
 3. **Analisar**: o contrato WCAG 2.2 AA vira critério de aceite verificável para todo requisito de UI.
 
-Se o time usa o [Spec-Kit](https://github.com/github/spec-kit), esses passos correspondem a `/speckit.specify`, `/speckit.plan` e `/speckit.analyze`. Entregue os artefatos de `docs/ux/` ao `@implementer` para construir conforme os requisitos.
+Entregue os artefatos de `docs/ux/` ao `@implementer` para construir conforme os requisitos.

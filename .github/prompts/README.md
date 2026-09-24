@@ -8,7 +8,7 @@ Toda execução de prompt passa pelas mesmas camadas, nesta ordem:
 
 | Ordem | Camada | Onde fica | O que faz |
 | --- | --- | --- | --- |
-| 1 | Hook `sessionStart` | [20-session-context.json](../hooks/20-session-context.json) | Injeta branch, arquivos alterados, especificações em `specs/` e as regras de `session_context.extra` da [política](../hooks/config/policy.json) |
+| 1 | Hook `sessionStart` | [20-session-context.json](../hooks/20-session-context.json) | Injeta branch, arquivos alterados, especificações em `.spec/` e as regras de `session_context.extra` da [política](../hooks/config/policy.json) |
 | 2 | Instruções do repositório | [copilot-instructions.md](../copilot-instructions.md) | Stack, comandos, convenções de IDs e fluxo SDD, sempre carregados |
 | 3 | Prompt | `.github/prompts/*.prompt.md` | Seleciona o agente (`agent:`), restringe as ferramentas (`tools:`) e define entradas, passos e saída |
 | 4 | Agente | [.github/agents/](../agents/) | Missão, limites e definição de pronto do papel |
@@ -67,7 +67,7 @@ Faça uma vez por projeto, antes do primeiro prompt:
 | # | Prompt | Agente | Entrada obrigatória | Saída | Critério para avançar |
 | --- | --- | --- | --- | --- | --- |
 | 1 | [/refine-user-stories](refine-user-stories.prompt.md) | `@requirements-engineer` | `fonte=`, `epico=` | Histórias INVEST e perguntas em aberto (no chat ou em `saida=`) | Histórias com fonte e perguntas encaminhadas ao Product Owner |
-| 2 | [/write-ears-spec](write-ears-spec.prompt.md) | `@requirements-engineer` | `feature=`, `fonte=` | `specs/<NNN>-<funcionalidade>/spec.md` | Todo requisito tem `origem:`, aceite e verificação planejada |
+| 2 | [/write-ears-spec](write-ears-spec.prompt.md) | `@requirements-engineer` | `feature=`, `fonte=` | `.spec/<NNN>-<funcionalidade>/` com `frd.md`, `nfrd.md` e `spec.md` completos (e `CONSTITUTION.md`, se ausente) | Todo requisito tem `origem:`, aceite e verificação planejada |
 | 3 | [/research-ux](research-ux.prompt.md) (só com UI) | `@se-ux-ui-designer` | `feature=`, `fonte=` | `docs/ux/<funcionalidade>-pesquisa.md` | Candidatos de UI levados de volta a `/write-ears-spec` |
 | 4 | [/validate-spec](validate-spec.prompt.md) | `@requirements-engineer` | `feature=` | Achados por severidade e status da spec | `spec.md` em `Pronto para revisão` sem bloqueios em P0 |
 | 5 | [/plan-architecture](plan-architecture.prompt.md) | `@software-architect` | `feature=` | `plan.md`, `CODEMAP.md`, ADRs `Proposto` | Todo requisito ativo mapeado a componente |
@@ -147,7 +147,7 @@ Faça uma vez por projeto, antes do primeiro prompt:
 /verify-quality feature=001-sala-do-eco
 ```
 
-Prefira uma sessão de chat nova por etapa. Assim o `sessionStart` injeta o estado atualizado de `specs/`, e o contador de escritas usado pelo quality gate vale só para a etapa atual.
+Prefira uma sessão de chat nova por etapa. Assim o `sessionStart` injeta o estado atualizado de `.spec/`, e o contador de escritas usado pelo quality gate vale só para a etapa atual.
 
 ## Regras que valem para todas as etapas
 

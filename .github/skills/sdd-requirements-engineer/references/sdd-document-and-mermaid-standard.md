@@ -1,15 +1,19 @@
 # Padrão de documentos SDD e Mermaid
 
-Use este contrato para pacotes canônicos em `specs/<NNN>-<funcionalidade>/` e decisões de apoio. As [instruções de artefatos](../../../instructions/sdd-artifacts.instructions.md) são donas dos nomes de arquivo e dos limites de validação. Inclua apenas seções e diagramas que esclareçam o escopo aprovado; não gere uma árvore de artefatos paralela.
+Use este contrato para o pacote canônico de artefatos e decisões de apoio. As [instruções de artefatos](../../../instructions/sdd-artifacts.instructions.md) são donas dos nomes de arquivo, da etapa dona de cada arquivo, da regra de completude e dos limites de validação. Todo arquivo contém todas as seções do seu modelo; não gere uma árvore de artefatos paralela.
 
 ## Responsabilidades dos artefatos
 
 | Artefato | Responsabilidade obrigatória |
 | --- | --- |
-| `spec.md` | Requisitos EARS canônicos, `origem:`, aceite, registro de fontes, premissas, escopo, aprovação e decisões em aberto |
-| `plan.md` | Design, diagramas aplicáveis, decisões ou links para ADRs, riscos, estratégia de testes e rastreabilidade requisito-componente |
-| `tasks.md` | Ordem de dependências, mapa de testes, checkboxes, gate de conclusão, comandos determinísticos e evidências de execução datadas |
-| Contratos e decisões de apoio | Arquivos separados apenas quando justificados, vinculados a partir do artefato dono, com aplicabilidade explícita |
+| `CONSTITUTION.md` | Princípios `CON-NNN` com fonte, governança e emenda; reutilize a constituição existente quando houver |
+| `frd.md` | Escopo funcional, atores, domínio e ciclo de vida, requisitos por domínio (por ID), interações externas, incrementos e revisão |
+| `nfrd.md` | Aplicabilidade de categorias, contextos e envelopes de medição, segurança, conformidade, restrições tecnológicas e revisão |
+| `spec.md` | Requisitos EARS canônicos, `origem:`, aceite, registro de fontes, matriz, premissas, escopo, aprovação e decisões em aberto |
+| `plan.md` | Análise, portfólio de design completo, decisões ou links para ADRs, riscos, estratégia de testes e rastreabilidade requisito-componente |
+| `tasks.md` | Ordem de dependências, mapa de testes, checkboxes, checklist, análise cruzada, verificação, gate de conclusão, comandos determinísticos e evidências datadas |
+| `CODEMAP.md` | Módulos, fluxo de dados, integrações e cobertura de REQ-IDs |
+| ADRs e artefatos adicionais | ADR para decisão estrutural; planos ou manifestos separados apenas quando justificados, vinculados a partir do artefato dono |
 
 ## Tema Mermaid universal
 
@@ -40,7 +44,7 @@ Mantenha os diagramas revisáveis:
 
 ## Portfólio de design
 
-Quando relevante para a funcionalidade, `plan.md` inclui:
+`plan.md` sempre inclui, nesta ordem:
 
 1. Visão geral da arquitetura
 2. Contexto do sistema
@@ -57,7 +61,7 @@ Quando relevante para a funcionalidade, `plan.md` inclui:
 13. Riscos e trade-offs
 14. Desenvolvimento em fases
 
-Para projetos pequenos (por exemplo, uma CLI ou biblioteca), é aceitável reduzir o portfólio a visão geral, contexto, modelo de dados, erros, superfície de implementação e visão de entrega, declarando as seções omitidas como não aplicáveis.
+Mantenha as 14 visões em qualquer porte de projeto, usando todas as seções do modelo `DESIGN` dos [modelos de artefatos](spec-templates.md). Em projetos pequenos (por exemplo, uma CLI ou biblioteca), escreva `NÃO APLICÁVEL: <motivo>` sob o título das seções sem conteúdo, em vez de removê-las. As visões 2, 4, 5, 6 e 7 levam diagrama Mermaid quando aplicáveis; nenhum diagrama descreve comportamento ou estrutura sem fonte.
 
 A visão de entrega mapeia IDs reais de requisitos para componentes de design, itens de plano e tarefas, IDs de dependências ou especificações vizinhas, testes/evidências e estado atual versus alvo. Não invente implementação ou aprovação para completar um diagrama.
 

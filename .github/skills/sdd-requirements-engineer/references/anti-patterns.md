@@ -26,7 +26,10 @@ Use este catálogo durante correção e validação. Corrija o defeito subjacent
 | Status `Aprovado` pré-preenchido | O artefato declara uma revisão que não ocorreu. | Comece como `Rascunho` ou `Pronto para revisão`; vincule a evidência de aprovação depois. |
 | Design-first sem requisitos recuperados | Escolhas de arquitetura viram a fonte de verdade sem revisão. | Derive e revise requisitos antes do handoff. |
 | Constituição local conflita com a governança do repositório | Duas autoridades podem impor regras incompatíveis. | Reutilize a constituição do repositório ou registre uma emenda explícita. |
-| Texto completo do requisito copiado em todos os artefatos | Cópias divergem e criam várias fontes normativas. | Mantenha uma declaração canônica e referencie por ID estável. |
+| Texto completo do requisito copiado em todos os artefatos | Cópias divergem e criam várias fontes normativas. | Mantenha a declaração canônica em `spec.md` e referencie por ID estável em `frd.md`, `nfrd.md`, `plan.md` e `tasks.md`. |
+| Seção do modelo omitida | O revisor não distingue "não se aplica" de "esquecido". | Mantenha a seção com `NÃO APLICÁVEL: <motivo>`, `PENDENTE` ou `BLOQUEADO`. |
+| Seção preenchida para parecer completa | Completude vira ficção e esconde lacunas reais. | Use apenas conteúdo com fonte; o resto fica `NÃO APLICÁVEL` ou bloqueio visível. |
+| Especificação fora de `.spec/` | Hooks, prompts e revisores não encontram o pacote. | Mova o pacote para `.spec/<NNN>-<funcionalidade>/`. |
 | Requisito sem design, tarefa ou verificação | A especificação não consegue guiar implementação nem evidência. | Adicione mapeamentos ou remova o item do escopo ativo. |
 | Tarefa sem requisito | Trabalho entra no escopo sem necessidade aprovada. | Rastreie-a a um requisito ou classifique-a como governança/habilitação com evidência. |
 | `[P]` baseado apenas no texto da tarefa | Trabalho paralelo ainda pode conflitar em dependências ou arquivos. | Verifique independência de dependências e de superfície de mudança. |

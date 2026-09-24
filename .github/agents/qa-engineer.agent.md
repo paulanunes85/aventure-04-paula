@@ -46,7 +46,7 @@ Padrões gerais de engenharia de qualidade aplicáveis a qualquer projeto:
 
 - Quais cenários de negócio carregam mais risco; derive-os dos REQ-IDs e das evidências do time
 - Valores esperados de cálculos ou validações; eles vêm de `spec.md` e da fonte citada em `origem:`
-- Quais requisitos já existem; leia `specs/<NNN>-<funcionalidade>/spec.md` e `tasks.md`
+- Quais requisitos já existem; leia `.spec/<NNN>-<funcionalidade>/spec.md` e `tasks.md`
 - A suíte, a cobertura e a configuração de CI atuais até que sejam lidas do disco
 
 Tudo isso deve emergir da investigação do próprio time e dos artefatos já em disco; o agente nunca preenche essas lacunas com suposições.
@@ -82,8 +82,6 @@ Tudo isso deve emergir da investigação do próprio time e dos artefatos já em
 
 Este agente valida qualidade ao longo do SDD:
 
-1. **Tarefas**: use as tarefas de teste e mapeie cada uma a um ID em `specs/<NNN>-<funcionalidade>/spec.md`.
+1. **Tarefas**: use as tarefas de teste e mapeie cada uma a um ID em `.spec/<NNN>-<funcionalidade>/spec.md`.
 2. **Implementação**: pareie em testes enquanto o código é escrito, mantendo o pipeline verde.
 3. **Análise**: confirme que todo requisito é verificável e reporte lacunas de cobertura em `tasks.md`.
-
-Se o time usa o [Spec-Kit](https://github.com/github/spec-kit), esses passos correspondem a `/speckit.tasks`, `/speckit.implement` e `/speckit.analyze`. O Spec-Kit é opcional.

@@ -1,41 +1,49 @@
 # Modelos de artefatos SDD
 
-Use estes modelos concisos para montar um pacote de Spec-Driven Development completo e rastreável. Declarações de requisitos usam a [notação EARS](./ears-notation.md). Adapte caminhos e nomes às convenções do repositório em vez de criar uma estrutura paralela.
+Use estes modelos para montar o pacote completo de Spec-Driven Development. Declarações de requisitos usam a [notação EARS](./ears-notation.md). Adapte caminhos e nomes às convenções do repositório em vez de criar uma estrutura paralela.
 
-As [instruções de artefatos](../../../instructions/sdd-artifacts.instructions.md) são autoritativas: requisitos e rastreabilidade de fontes ficam em `spec.md`, design e análise em `plan.md`, e mapeamento de testes e evidências de execução em `tasks.md`. Os títulos em maiúsculas abaixo identificam seções reutilizáveis, não arquivos extras obrigatórios.
+As [instruções de artefatos](../../../instructions/sdd-artifacts.instructions.md) são autoritativas sobre o pacote, a etapa dona de cada arquivo e a regra de completude. Os títulos em maiúsculas abaixo identificam responsabilidades; a tabela diz em qual arquivo cada uma vive. Todo arquivo contém todas as seções do seu modelo, e seções sem conteúdo ficam `NÃO APLICÁVEL: <motivo>`.
 
 ## Política de artefatos
 
-| Responsabilidade | Onde vive por padrão | Conteúdo |
+| Responsabilidade | Arquivo | Conteúdo |
 | --- | --- | --- |
-| `CONSTITUTION` | Repositório (`.specify/memory/constitution.md`, `CONSTITUTION.md` ou instruções do repositório) | Princípios inegociáveis, governança e regras de emenda |
-| `SPECIFICATION` | `spec.md` | Requisitos EARS normativos, escopo, atores e aceite |
+| `CONSTITUTION` | `CONSTITUTION.md` na raiz | Princípios inegociáveis, governança e regras de emenda |
+| `FRD` | `frd.md` ([modelo](./frd-template.md)) | Escopo funcional, atores, domínio, requisitos por domínio (por ID), interações externas e incrementos |
+| `NFRD` | `nfrd.md` ([modelo](./nfrd-template.md)) | Aplicabilidade, contextos e envelopes de medição, segurança, conformidade e restrições tecnológicas |
+| `SPECIFICATION` | `spec.md` | Declarações EARS canônicas, escopo, atores, aceite e verificação planejada |
+| `SOURCE_TRACEABILITY` | `spec.md` | Registro de fontes, matriz de rastreabilidade e disposições históricas |
 | `ANALYSIS` | `plan.md` | Evidências, lacunas, riscos, alternativas e confiança |
-| `DESIGN` | `plan.md` | Arquitetura, dados, interfaces, erros, segurança e trade-offs |
+| `DESIGN` | `plan.md` | Portfólio de design completo, estratégia de testes e visão de entrega |
+| `DECISIONS` | `plan.md` e `docs/adr/` | Decisões `DEC-NNN`; ADR para decisão estrutural ou nova dependência |
 | `TASKS` | `tasks.md` | Tarefas de implementação e validação ordenadas por dependência |
-| `TESTING` | `tasks.md` (ou `plan.md` para a estratégia) | Estratégia de testes, catálogo de testes e status de verificação por requisito |
-| `CHECKLIST` | `tasks.md` | Gates de revisão e release |
-| `CROSS_ANALYSIS` | `plan.md` ou `tasks.md` | Consistência requisito-design-tarefa-verificação |
+| `TESTING` | `tasks.md` | Mapa e catálogo de testes por requisito (a estratégia fica em `plan.md`) |
+| `CHECKLIST` | `tasks.md` | Gates de revisão, implementação, verificação e release |
+| `CROSS_ANALYSIS` | `tasks.md` | Consistência requisito-design-tarefa-verificação e análise de órfãos |
 | `VERIFICATION` | `tasks.md` | Verificações planejadas e evidências executadas |
-| `DECISIONS` | `plan.md` ou `docs/adr/` | Decisões relevantes e gatilhos de revisão |
-| `SOURCE_TRACEABILITY` | `spec.md` | Proveniência de todo ID de requisito ativo e histórico |
 
-Reutilize uma constituição existente. Crie uma apenas quando o repositório não tiver artefato governante e o escopo solicitado incluir governança.
+Reutilize uma constituição existente. Quando não houver, crie `CONSTITUTION.md` como `Rascunho` com princípios derivados de fontes verificáveis do repositório.
 
-## Layout sugerido
+## Layout
 
 ```text
-specs/
+CONSTITUTION.md
+CODEMAP.md
+.spec/
   001-nome-da-funcionalidade/
+    frd.md
+    nfrd.md
     spec.md
     plan.md
     tasks.md
 docs/
   adr/
     0001-titulo-da-decisao.md
+  ux/
+    001-nome-da-funcionalidade-pesquisa.md
 ```
 
-Registre a aprovação de escopo em um ADR ou decisão vinculada somente quando necessário. Não invente arquivos gerados, checkpoints ou geradores. Preserve especificações existentes e caminhos aprovados.
+Registre a aprovação de escopo em um ADR ou decisão vinculada quando houver decisão humana a registrar. Não invente arquivos gerados, checkpoints ou geradores. Preserve especificações existentes e caminhos aprovados.
 
 ## CONSTITUTION
 
@@ -72,7 +80,9 @@ Registre a aprovação de escopo em um ADR ou decisão vinculada somente quando 
 - ID da funcionalidade: <NNN ou convenção do repositório>
 - Status: Rascunho
 - Fontes: <SRC-IDs>
-- Constituição: <caminho ou não-aplicável com justificativa>
+- FRD: [frd.md](frd.md)
+- NFRD: [nfrd.md](nfrd.md)
+- Constituição: <caminho>
 
 ## Problema e resultado
 <Problema, atores e resultado observável desejado.>
@@ -107,6 +117,13 @@ origem: SRC-001
 **Verificação**
 - <método planejado e evidência>
 
+<Para NFR-NNN, acrescente: `Envelope de medição: [nfrd.md](nfrd.md) NFR-NNN`.>
+
+## Matriz de rastreabilidade
+| REQ-ID | Padrão EARS | origem | SRC-ID | AC-ID | Verificação |
+| --- | --- | --- | --- | --- | --- |
+| REQ-001 | <padrão> | <caminho#linhas> | SRC-001 | AC-REQ-001-01 | <método> |
+
 ## Premissas, bloqueios e perguntas em aberto
 | ID | Tipo | Declaração | Responsável | Impacto |
 | --- | --- | --- | --- | --- |
@@ -116,9 +133,21 @@ origem: SRC-001
 | ID histórico | Última fonte | Disposição | IDs substitutos | Decisão |
 | --- | --- | --- | --- | --- |
 | <ID> | SRC-... | transferido/substituído/dividido/mesclado/aposentado | <IDs ou nenhum> | <decisão> |
+
+## Validação (<AAAA-MM-DD>)
+| Gate | Resultado | Evidência ou motivo |
+| --- | --- | --- |
+| <G2.01 ...> | PASS/FAIL/BLOQUEADO/NÃO APLICÁVEL | <evidência> |
+
+## Histórico de mudanças
+| Versão | Data | Mudança |
+| --- | --- | --- |
+| 0.1.0 | <AAAA-MM-DD> | Especificação inicial. |
 ```
 
-## ANALYSIS
+## ANALYSIS (seção de `plan.md`)
+
+Inclua este bloco em `plan.md` logo após `Metadados da funcionalidade`.
 
 ```markdown
 ## Análise
@@ -260,7 +289,7 @@ Nomeie as camadas, o que cada uma prova e onde a evidência é registrada.
 | 0.1.0 | <AAAA-MM-DD> | Design inicial. |
 ````
 
-Todo bloco Mermaid adicional usa a mesma diretiva de tema universal. Adicione as classes canônicas `default`, `zone` e `external` a diagramas flowchart, graph e class. Diagramas de estado, sequência, ER e gantt herdam o tema sem `classDef`.
+Todo bloco Mermaid adicional usa a mesma diretiva de tema universal. Adicione as classes canônicas `default`, `zone` e `external` a diagramas flowchart, graph e class. Diagramas de estado, sequência, ER e gantt herdam o tema sem `classDef`. Toda seção acima permanece no arquivo; quando não se aplicar, escreva `NÃO APLICÁVEL: <motivo>` sob o título.
 
 ## TASKS (`tasks.md`)
 
@@ -323,6 +352,8 @@ flowchart TD
 | --- | --- | --- | --- | --- |
 | DEV-001 | <esperado> | <real> | <impacto> | <decisão ou aberta> |
 
+<Inclua aqui as seções CHECKLIST e CROSS_ANALYSIS abaixo.>
+
 ## Gate de conclusão
 - [ ] Toda tarefa tem evidência.
 - [ ] Nenhum requisito ou teste está órfão.
@@ -340,7 +371,7 @@ Marcadas como concluídas pela verificação: <nenhuma>
 
 Use `[P]` apenas quando o grafo de dependências e as superfícies de mudança permitirem trabalho paralelo. Uma tarefa marcada deve aparecer na linha única `Marcadas como concluídas pela verificação: T001, ...` do registro.
 
-## CHECKLIST
+## CHECKLIST (seção de `tasks.md`)
 
 ```markdown
 ## Checklist
@@ -361,7 +392,7 @@ Use `[P]` apenas quando o grafo de dependências e as superfícies de mudança p
 - [ ] Evidências executadas estão vinculadas sem exagerar o status.
 ```
 
-## CROSS_ANALYSIS
+## CROSS_ANALYSIS (seção de `tasks.md`)
 
 ```markdown
 ## Análise cruzada
@@ -370,6 +401,11 @@ Use `[P]` apenas quando o grafo de dependências e as superfícies de mudança p
 | --- | --- | --- | --- | --- | --- | --- |
 | REQ-001 | SRC-001 | <componente> | T001 | AC-REQ-001-01 | VER-001 | coberto |
 
+### Consistência entre arquivos
+- IDs em `frd.md`/`nfrd.md` ausentes de `spec.md`: <nenhum ou IDs>
+- IDs de `spec.md` ausentes dos resumos de `frd.md`/`nfrd.md`: <nenhum ou IDs>
+- Contagens e status divergentes: <nenhum ou achados>
+
 ### Análise de órfãos
 - Requisitos sem cobertura a jusante: <nenhum ou IDs>
 - Elementos de design sem requisitos: <nenhum ou IDs>
@@ -377,7 +413,9 @@ Use `[P]` apenas quando o grafo de dependências e as superfícies de mudança p
 - Verificações sem requisitos: <nenhuma ou IDs>
 ```
 
-## Artefatos opcionais
+## Artefatos adicionais
+
+São os únicos arquivos além do pacote e só existem quando justificados:
 
 - Plano de implementação separado: use quando estratégia, rollout, migração ou sequenciamento entre times precisar de mais detalhe que `tasks.md`.
 - Plano de testes separado: use quando ambientes de teste, dados, responsáveis, medição não funcional ou qualificação de release precisarem de plano dedicado.
@@ -385,8 +423,8 @@ Use `[P]` apenas quando o grafo de dependências e as superfícies de mudança p
 
 ## Regras de consistência
 
-- Um ID de requisito ativo tem uma declaração normativa canônica.
-- Outros artefatos referenciam o ID e podem resumir sem redefinir.
+- Um ID de requisito ativo tem uma declaração normativa canônica, em `spec.md`.
+- Outros artefatos, inclusive `frd.md` e `nfrd.md`, referenciam o ID e podem resumir sem redefinir.
 - Todo requisito ativo tem cobertura de fonte, design, tarefa, aceite e verificação.
 - Todo ID histórico tem disposição explícita.
 - O status é baseado em evidência: `Rascunho`, `Pronto para revisão`, `Aprovado`, `Implementado` ou `Verificado`.

@@ -1,6 +1,6 @@
 # Modelo de Documento de Requisitos Não Funcionais (NFRD)
 
-Use este modelo para restrições de qualidade mensuráveis. Declarações normativas seguem a [notação EARS](./ears-notation.md). Nunca preencha uma meta com um padrão "de mercado" quando evidência de carga, política ou um responsável não a forneceu.
+Grave este modelo completo em `.spec/<NNN>-<funcionalidade>/nfrd.md`. Todas as seções são obrigatórias; seções sem conteúdo ficam `NÃO APLICÁVEL: <motivo>`. A declaração EARS, o aceite e a verificação de cada NFR vivem apenas em [spec.md](./spec-templates.md#specification-specmd); o NFRD é dono da aplicabilidade, dos contextos e do envelope de medição de cada ID. Nunca preencha uma meta com um padrão "de mercado" quando evidência de carga, política ou um responsável não a forneceu.
 
 ```markdown
 ---
@@ -9,7 +9,8 @@ description: "Restrições de qualidade mensuráveis e envelopes de verificaçã
 date: "<AAAA-MM-DD>"
 version: "0.1.0"
 status: "Rascunho"
-companion_frd: "<caminho relativo ou não-criado>"
+companion_frd: "frd.md"
+spec: "spec.md"
 ---
 
 # Documento de Requisitos Não Funcionais: <Projeto ou Funcionalidade>
@@ -48,17 +49,12 @@ companion_frd: "<caminho relativo ou não-criado>"
 ## 4. Requisitos de qualidade
 
 ### NFR-001: <Título curto>
-origem: <SRC-### ou [GREENFIELD] justificativa>
 
+- Declaração canônica, aceite e verificação: [spec.md](spec.md) `NFR-001` (não copie a declaração aqui)
 - Categoria: <categoria>
-- Padrão: <padrão EARS>
-- Prioridade: <P0|P1|P2|P3>
-- Status: Proposto
 - Justificativa: <por que a restrição é necessária>
 - Aplica-se a: <contextos>
 - Responsável: <responsável>
-
-> <Declaração EARS canônica com restrição mensurável aprovada, ou declaração cuja meta não resolvida está explicitamente bloqueada.>
 
 **Envelope de medição**
 
@@ -72,11 +68,7 @@ origem: <SRC-### ou [GREENFIELD] justificativa>
 | Ambiente | <contexto ou BLOQUEADO> |
 | Instrumentação | <fonte da evidência ou BLOQUEADO> |
 
-**Sinais de aceite**
-- AC-NFR-001-01: <resultado observável de aprovação/reprovação sob o envelope de medição>
-
-**Verificação**
-- <teste|inspeção|análise|demonstração|medição>: <evidência planejada>
+<Para restrições verificadas por inspeção (por exemplo, plataforma obrigatória), preencha o envelope com `NÃO APLICÁVEL: <motivo>` nas linhas sem medição.>
 
 <Repita para toda categoria de qualidade aplicável.>
 
@@ -124,5 +116,7 @@ origem: <SRC-### ou [GREENFIELD] justificativa>
 - Segurança identifica autenticação, autorização, proteção e comportamento em falha quando aplicável.
 - Conformidade é explicitamente aplicável, não aplicável ou bloqueada; nunca é suposta em silêncio.
 - Restrições tecnológicas têm evidência e gatilho de revisão.
+- Todo `NFR-NNN` ativo de `spec.md` aparece na seção 4 e no resumo, e nenhuma declaração EARS foi copiada.
+- Toda seção está presente; seções sem conteúdo declaram `NÃO APLICÁVEL` com motivo.
 - Termos vagos ("rápido", "seguro", "pronto para produção", "intuitivo") foram convertidos em envelopes de medição ou bloqueios.
 - O status de aprovação não vem preenchido.

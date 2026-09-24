@@ -1,6 +1,6 @@
 ---
 name: "break-down-tasks"
-description: "Quebra o plan.md em specs/<NNN>-<funcionalidade>/tasks.md com tarefas RED/GREEN ordenadas por dependência, marcadores [S]/[P], rastreio REQ/AC, mapa de testes e verificação planejada, e faz a análise cruzada spec-plan-tasks."
+description: "Quebra o plan.md em .spec/<NNN>-<funcionalidade>/tasks.md completo, com tarefas RED/GREEN ordenadas por dependência, marcadores [S]/[P], rastreio REQ/AC, mapa de testes, checklist, verificação planejada e análise cruzada frd-nfrd-spec-plan-tasks."
 argument-hint: "feature=NNN-nome-da-funcionalidade"
 agent: "software-architect"
 tools: ["read", "search", "edit"]
@@ -77,7 +77,7 @@ Feche com o resultado da análise cruzada:
 
 ## Regras de SDD e rastreabilidade
 
-- Leia as instruções SDD antes de editar `specs/**`.
+- Leia as instruções SDD antes de editar `.spec/**`.
 - RED precede GREEN para o mesmo comportamento; um ciclo planejado não prova que testes rodaram.
 - Cada tarefa entrega um comportamento revisável em um PR pequeno.
 - `[x]` exige evidência de aceite completa e entrada no registro de execução datado; este prompt não marca tarefas.
@@ -89,7 +89,7 @@ Feche com o resultado da análise cruzada:
 - [ ] SDD/TDD e as instruções aplicáveis foram carregados antes da escrita
 - [ ] Toda tarefa tem ID estável, marcador `[S]`/`[P]`, referência ao plano, REQ/AC, arquivos e aceite
 - [ ] Todo comportamento tem par RED/GREEN
-- [ ] Grafo, mapa de testes, verificação, gate de conclusão e registro de execução estão presentes e consistentes
+- [ ] Grafo, mapa de testes, verificação, checklist, análise cruzada, gate de conclusão e registro de execução estão presentes e consistentes
 - [ ] Nenhuma tarefa está marcada como concluída
 - [ ] A análise cruzada não tem `FAIL` sem achado encaminhado
 
@@ -113,10 +113,10 @@ Defina dependências e marque `[P]` apenas quando não houver dependência nem a
 Atribua IDs de teste `TST-...` e verificação `VER-NNN` ligados a REQ/AC, com método, resultado esperado e status `planejado`.
 
 **Passo 5 - Montar o artefato.**
-Escreva metadados, gate pré-implementação, regras de execução, grafo, mapa de testes, fases, verificação, desvios, gate de conclusão e registro de execução com `0 de N` tarefas concluídas.
+Escreva todas as seções de `TASKS`, `CHECKLIST` e `CROSS_ANALYSIS` dos modelos: metadados, gate pré-implementação, regras de execução, grafo, mapa de testes, fases, verificação, desvios, checklist, análise cruzada, gate de conclusão, registro de execução com `0 de N` tarefas concluídas e histórico de mudanças.
 
 **Passo 6 - Analisar e gravar.**
-Execute a análise cruzada spec-plan-tasks e registre cada verificação. Grave `specs/<NNN>-<funcionalidade>/tasks.md` e indique a primeira tarefa desbloqueada para `/implement-task`.
+Execute a análise cruzada entre `frd.md`, `nfrd.md`, `spec.md`, `plan.md` e `tasks.md` e registre cada verificação. Grave `.spec/<NNN>-<funcionalidade>/tasks.md` e indique a primeira tarefa desbloqueada para `/implement-task`.
 
 ## Exemplo de invocação
 

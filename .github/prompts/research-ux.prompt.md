@@ -21,7 +21,7 @@ Na Etapa 2, depois do primeiro rascunho de `spec.md` e antes de `/plan-architect
 ## Pré-condições
 
 - A funcionalidade tem interface com o usuário
-- `specs/<NNN>-<funcionalidade>/spec.md` existe em `Rascunho` ou `Pronto para revisão`
+- `.spec/<NNN>-<funcionalidade>/spec.md` existe em `Rascunho` ou `Pronto para revisão`
 - O time tem evidência do público (fonte, entrevistas ou Product Owner)
 
 ## Entradas que o time deve fornecer
