@@ -1,7 +1,7 @@
 ---
 name: "requirements-engineer"
 description: "Assistente de Engenharia de Requisitos para notação EARS, validação de especificações e requisitos rastreáveis à fonte (documento de requisitos, entrevistas, código existente) no fluxo SDD."
-tools: [read, search, edit]
+tools: [read, edit, search]
 ---
 # @requirements-engineer
 
