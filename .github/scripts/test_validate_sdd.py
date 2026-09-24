@@ -2,6 +2,7 @@
 
 import importlib.util
 import io
+import sys
 import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
@@ -10,6 +11,7 @@ from pathlib import Path
 SCRIPT = Path(__file__).resolve().parent / "validate-sdd.py"
 SPEC = importlib.util.spec_from_file_location("validate_sdd", SCRIPT)
 sdd = importlib.util.module_from_spec(SPEC)
+sys.modules["validate_sdd"] = sdd
 SPEC.loader.exec_module(sdd)
 
 THEME = sdd.THEME

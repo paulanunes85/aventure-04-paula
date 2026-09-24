@@ -71,15 +71,27 @@ Reutilize `CONSTITUTION.md` quando existir. Se não existir, crie `CONSTITUTION.
 
 ## Verificações executáveis
 
-Se o repositório tiver um validador de rastreabilidade (script ou job de CI), execute-o a partir da raiz e anexe o resultado. Se não houver, faça a verificação manual abaixo e reporte o validador como `NÃO EXECUTADO (inexistente)`:
+Execute a partir da raiz, nesta ordem, e registre comando, data, código de saída e resumo em `spec.md` (seção `Validação`) ou no registro de execução de `tasks.md`:
+
+| Ordem | Comando | O que prova | Quando |
+| --- | --- | --- | --- |
+| 1 | `python3 -B -m unittest discover -s .github/scripts -p 'test_validate_sdd.py'` | O próprio validador detecta cada defeito do contrato | Antes de confiar no resultado e após mudar o validador |
+| 2 | `python3 -B .github/scripts/validate-sdd.py` | Pacote em `.spec/`, `CONSTITUTION.md`, completude de seções, `origem:`, `SRC-###`, âncoras `#Lx-Ly` dentro do documento de origem, disposição de todo ID da fonte (`RF-`, `RNF-`, `RN-`), IDs entre `frd.md`/`nfrd.md`/`spec.md`/`plan.md`/`tasks.md`, EARS não copiado, tarefas, grafo, registro e links relativos | Ao fim de `/write-ears-spec`, `/validate-spec`, `/plan-architecture` e `/break-down-tasks` |
+| 3 | `python3 -B .github/scripts/validate-sdd.py --require-full --strict` | Pacote inteiro sem avisos | Antes do handoff para `/implement-task` e em PR |
+| 4 | `python3 -B .github/scripts/validate-design-diagrams.py` | Tema claro universal e ausência de cores cromáticas em `.spec/` e nas customizações de `.github/` | Sempre que um diagrama mudar |
+
+Opções de `validate-sdd.py`: `--package 001` limita a um pacote; `--source-id-pattern '<regex>'` troca o padrão de IDs do documento de origem; `--format json` gera saída para CI. Códigos de saída: `0` sem erros, `1` com erros (ou avisos com `--strict`), `2` sem pacote em `.spec/` (aprovação vazia recusada).
+
+Os demais scripts de `.github/scripts/` vieram de outro projeto (esperam `.specs/`, arquivos em maiúsculas e títulos em inglês) e não validam este repositório; não os cite como evidência. Nunca registre um validador como aprovado sem a saída da execução. Sem acesso a terminal, reporte-o como `NÃO EXECUTADO (sem ferramenta de execução)` e faça a verificação manual abaixo:
 
 - Todo arquivo do pacote da etapa existe e tem todas as seções do modelo, com `NÃO APLICÁVEL`, `PENDENTE` ou `BLOQUEADO` justificados.
-- Todo `REQ-NNN`/`NFR-NNN` ativo tem linha `origem:` válida em `spec.md`.
+- Todo `REQ-NNN`/`NFR-NNN` ativo tem linha `origem:` válida em `spec.md`, e cada âncora `#Lx-Ly` existe no documento de origem.
+- Todo ID do documento de origem tem requisito ou disposição em `spec.md`.
 - Todo `REQ-NNN` ativo aparece no resumo de `frd.md` e todo `NFR-NNN` ativo aparece no resumo de `nfrd.md`, sem declaração EARS copiada.
 - Todo requisito ativo aparece em `plan.md` e em pelo menos uma tarefa de `tasks.md`.
 - Todo teste que verifica um requisito referencia o ID em comentário (ver [tests.instructions.md](tests.instructions.md)).
 
-Validação textual não verifica semântica EARS, aprovações humanas, renderização Mermaid, precisão de âncoras de linha ou equivalência comportamental. Revise esses pontos explicitamente e anexe evidência de execução para verificações de runtime aplicáveis.
+Validação textual não verifica semântica EARS, aprovações humanas, renderização Mermaid, se a âncora aponta o trecho certo ou equivalência comportamental. Revise esses pontos explicitamente e não reporte validação de artefatos como sucesso de implementação.
 
 ## Convenções
 
@@ -98,19 +110,11 @@ Validação textual não verifica semântica EARS, aprovações humanas, renderi
 | Use os validadores existentes e declare seus limites | Exigir scripts inexistentes ou declarar validação semântica a partir de busca textual |
 | Registre decisões humanas, evidências datadas ou bloqueios explícitos | Marcar trabalho planejado como concluído ou simular aprovação |
 
-## Verification
-
-- Required artifacts, metadata, IDs, and cross-references are internally consistent.
-- Every active requirement maps to acceptance, implementation, and verification evidence or an explicit blocker.
-- Artifact-only validation is not reported as implementation success.
-- `python3 scripts/validate-sdd-documents.py` passes for the canonical package.
-- `python3 scripts/validate-design-diagrams.py` reports every SDD Mermaid block
-  themed and free of chromatic colors.
-
 ## Checklist de PR
 
 - [ ] O pacote da etapa está completo: todo arquivo existe e toda seção do modelo está presente ou justificada como `NÃO APLICÁVEL`.
 - [ ] Os artefatos usam caminhos canônicos e IDs, fontes e critérios de aceite consistentes; `frd.md` e `nfrd.md` não redefinem declarações de `spec.md`.
+- [ ] `validate-sdd.py` (com `--require-full --strict` antes do handoff) e `validate-design-diagrams.py` foram executados e a saída está registrada.
 - [ ] Todo requisito ativo mapeia para verificações planejadas ou executadas, com lacunas explícitas.
 - [ ] Toda declaração `origem:` é válida e o relatório de referências em testes foi revisado.
 - [ ] Significado EARS, aprovação de escopo, renderização de diagramas e evidências de runtime foram revisados separadamente quando aplicável.

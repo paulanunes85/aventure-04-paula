@@ -83,7 +83,7 @@ Use uma entrada de checkbox por tarefa:
 
 ## Validação exigida
 
-Se o repositório tiver validadores (script de rastreabilidade, job de CI, lint de Markdown, renderizador Mermaid), execute-os e registre comando, data e resultado em `tasks.md`. Se não houver, faça a verificação manual das [instruções de artefatos](../../../instructions/sdd-artifacts.instructions.md) e registre os validadores como não executados.
+Execute os validadores da seção `Verificações executáveis` das [instruções de artefatos](../../../instructions/sdd-artifacts.instructions.md) (`.github/scripts/validate-sdd.py` e `.github/scripts/validate-design-diagrams.py`) e registre comando, data e resultado em `tasks.md` ou na seção `Validação` de `spec.md`. Sem ferramenta de execução, faça a verificação manual descrita ali e registre os validadores como não executados.
 
 Validadores textuais não provam correção EARS, precisão de linhas de fonte, sintaxe de diagramas, aprovação ou testes de produto passando. Revise esses pontos separadamente. Renderize os diagramas aplicáveis com um renderizador disponível (por exemplo, `npx @mermaid-js/mermaid-cli`) e registre o resultado; se nenhum estiver disponível, reporte a renderização como não executada.
 

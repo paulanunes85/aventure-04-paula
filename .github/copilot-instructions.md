@@ -22,6 +22,7 @@ Estas instruções valem para todo o repositório. Substitua os marcadores `<...
 | Lint / typecheck | `find . -name '*.js' -not -path './node_modules/*' -exec node --check {} +` (apenas sintaxe; sem typecheck) |
 | Testes com cobertura | `node --test --experimental-test-coverage --test-coverage-lines=80 --test-coverage-branches=70` |
 | Build | Não aplicável (JavaScript executado diretamente com `node index.js`) |
+| Validação SDD | `python3 -B .github/scripts/validate-sdd.py` (`--require-full --strict` antes do handoff) e `python3 -B .github/scripts/validate-design-diagrams.py` |
 | Limites de cobertura | 80% linhas / 70% branches |
 | Quality gate (hook `agentStop`) | Desativado até a primeira tarefa criar `package.json`; então ativar em `.github/hooks/config/policy.json` com os comandos de lint e testes acima |
 

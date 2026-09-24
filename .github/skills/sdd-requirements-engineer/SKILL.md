@@ -110,7 +110,7 @@ Atribua a cada fonte um identificador estável `SRC-###`. Um artefato derivado n
    - Use o [catálogo de antipadrões](references/anti-patterns.md) para corrigir defeitos antes da entrega.
    - Mantenha artefatos como `Rascunho` ou `Pronto para revisão` até um revisor responsável aprová-los.
    - Use `Implementado` ou `Verificado` apenas quando houver evidência no repositório ou de execução.
-   - Se o repositório tiver um validador de rastreabilidade, execute-o para as especificações alteradas e reporte o resultado. Caso contrário, faça a verificação manual descrita nas instruções de artefatos e reporte o validador como não executado. Revise significado EARS, aprovações e renderização de diagramas separadamente.
+   - Execute `python3 -B .github/scripts/validate-sdd.py` (e `--require-full --strict` antes do handoff) e `python3 -B .github/scripts/validate-design-diagrams.py`, e reporte comando, código de saída e achados. Sem ferramenta de execução, reporte-os como não executados e faça a verificação manual das instruções de artefatos. Revise significado EARS, aprovações e renderização de diagramas separadamente.
    - Entregue apenas o escopo aprovado, os caminhos dos artefatos, a ordem de dependências, os resultados dos gates e os bloqueios não resolvidos. Não inicie a implementação como parte desta skill.
 
 ## Contrato de requisito EARS

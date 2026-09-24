@@ -8,7 +8,7 @@ import pathlib
 import re
 import sys
 
-ROOT = pathlib.Path(__file__).resolve().parents[1]
+ROOT = pathlib.Path(__file__).resolve().parents[2]
 GITHUB_ROOT = ROOT / ".github"
 BLOCK_PATTERNS = (
     re.compile(r"```mermaid\n(?P<body>.*?)```", re.DOTALL),
@@ -37,7 +37,7 @@ FROZEN = {
     "006-terraform-adoption-live-azure",
 }
 DEFAULT_ROOTS = (
-    ROOT / ".specs",
+    ROOT / ".spec",
     GITHUB_ROOT / "skills",
     GITHUB_ROOT / "agents",
     GITHUB_ROOT / "prompts",
@@ -64,9 +64,9 @@ def diagram_kind(body: str) -> str:
 
 def canonical_graph_artifact(path: pathlib.Path) -> bool:
     if (
-        path.name in {"DESIGN.md", "TASKS.md"}
+        path.name in {"plan.md", "tasks.md", "frd.md", "nfrd.md"}
         and path.parent.name not in FROZEN
-        and (path.parent / "SPECIFICATION.md").is_file()
+        and (path.parent / "spec.md").is_file()
     ):
         return True
     try:
@@ -157,7 +157,7 @@ def main(argv: list[str] | None = None) -> int:
         type=pathlib.Path,
         default=None,
         help=(
-            "scan only this root; by default scans .specs and canonical "
+            "scan only this root; by default scans .spec and canonical "
             ".github skills, agents, prompts, and instructions"
         ),
     )

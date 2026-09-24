@@ -114,7 +114,7 @@ EARS_PATTERNS = (
     "estado", "opcional", "indesejado", "complexo",
 )
 
-H2 = re.compile(r"^##\s+(.+?)\s*$", re.M)
+H2 = re.compile(r"^##[ \t]+([^\n]*\S)", re.M)
 FENCE = re.compile(r"^(```|~~~).*?^\1", re.M | re.S)
 REQ_HEAD = re.compile(r"^###\s+((?:REQ|NFR)-\d{3})\s*:", re.M)
 NEXT_HEAD = re.compile(r"^#{2,3}\s", re.M)
@@ -298,7 +298,7 @@ def source_documents(root: Path, spec: Path, text: str) -> list[Path]:
 
 
 def field_value(block: str, name: str) -> str | None:
-    match = re.search(rf"^- {name}:\s*(.+)$", block, re.M)
+    match = re.search(rf"^- {name}:[ \t]*(\S.*)$", block, re.M)
     return match.group(1).strip() if match else None
 
 
@@ -357,7 +357,7 @@ def check_spec(rep: Report, root: Path, spec: Path,
     text = spec.read_text(encoding="utf-8")
     check_sections(rep, spec, text)
     header = text.split("\n## ", 1)[0]
-    status = re.search(r"^- Status:\s*(.+)$", header, re.M)
+    status = re.search(r"^- Status:[ \t]*(\S.*)$", header, re.M)
     if status is None or not any(
             normalize(status.group(1)).startswith(s)
             for s in SPEC_STATUS):
@@ -508,8 +508,8 @@ def check_tasks(rep: Report, path: Path, active: set[str]) -> None:
 
 
 def raw_section(text: str, title: str) -> str:
-    match = re.search(rf"^##\s+{re.escape(title)}\b.*?(?=^## |\Z)",
-                      text, re.M | re.S)
+    match = re.search(rf"^##[ \t]+{re.escape(title)}\b.*?(?=^## |\Z)",
+                      text, re.M | re.S | re.I)
     return match.group(0) if match else ""
 
 
@@ -563,10 +563,7 @@ def packages(root: Path, selected: str | None) -> list[Path]:
     return found
 
 
-def validate(root: Path, selected: str | None, require_full: bool,
-             source_pattern: str) -> tuple[Report, int]:
-    rep = Report(root)
-    pattern = re.compile(source_pattern)
+def check_repository(rep: Report, root: Path) -> None:
     for name in FORBIDDEN_DIRS:
         if (root / name).is_dir():
             rep.error("PKG-001", root / name,
@@ -577,45 +574,60 @@ def validate(root: Path, selected: str | None, require_full: bool,
         rep.error("CON-001", constitution,
                   "CONSTITUTION.md ausente; /write-ears-spec cria em "
                   "Rascunho")
-    found = packages(root, selected)
-    extra = [root / "CONSTITUTION.md", root / "CODEMAP.md"]
+    extra = [constitution, root / "CODEMAP.md"]
     extra += sorted((root / "docs" / "adr").glob("*.md"))
     for path in extra:
         if path.is_file():
             check_mermaid(rep, path)
+
+
+def check_presence(rep: Report, files: dict[str, Path],
+                   require_full: bool) -> None:
+    for name in REQUIRED_FILES:
+        if not files[name].is_file():
+            rep.error("PKG-002", files[name], "arquivo obrigatório ausente")
+    level = rep.error if require_full else rep.warn
+    for name in STAGE_FILES:
+        if not files[name].is_file():
+            level("PKG-003", files[name], "etapa ainda não produzida")
+    if files["tasks.md"].is_file() and not files["plan.md"].is_file():
+        rep.error("PKG-004", files["tasks.md"],
+                  "tasks.md existe sem plan.md")
+
+
+def check_package(rep: Report, root: Path, package: Path,
+                  require_full: bool, pattern: re.Pattern[str]) -> None:
+    files = {n: package / n for n in REQUIRED_FILES + STAGE_FILES}
+    check_presence(rep, files, require_full)
+    active: set[str] = set()
+    docs: list[Path] = []
+    if files["spec.md"].is_file():
+        active, docs = check_spec(rep, root, files["spec.md"], pattern)
+    checks = (
+        ("frd.md", lambda p: check_companion(rep, p, active, "REQ-")),
+        ("nfrd.md", lambda p: check_companion(rep, p, active, "NFR-")),
+        ("plan.md", lambda p: check_plan(rep, p, active)),
+        ("tasks.md", lambda p: check_tasks(rep, p, active)),
+    )
+    for name, check in checks:
+        if files[name].is_file():
+            check(files[name])
+    primary = docs[0] if docs else None
+    for path in sorted(package.rglob("*.md")):
+        text = path.read_text(encoding="utf-8")
+        check_anchors(rep, root, path, text, primary)
+        check_mermaid(rep, path)
+        check_links(rep, path)
+
+
+def validate(root: Path, selected: str | None, require_full: bool,
+             source_pattern: str) -> tuple[Report, int]:
+    rep = Report(root)
+    pattern = re.compile(source_pattern)
+    check_repository(rep, root)
+    found = packages(root, selected)
     for package in found:
-        files = {n: package / n for n in REQUIRED_FILES + STAGE_FILES}
-        for name in REQUIRED_FILES:
-            if not files[name].is_file():
-                rep.error("PKG-002", files[name], "arquivo obrigatório "
-                          "ausente")
-        for name in STAGE_FILES:
-            if not files[name].is_file():
-                level = rep.error if require_full else rep.warn
-                level("PKG-003", files[name],
-                      "etapa ainda não produzida")
-        if files["tasks.md"].is_file() and not files["plan.md"].is_file():
-            rep.error("PKG-004", files["tasks.md"],
-                      "tasks.md existe sem plan.md")
-        active: set[str] = set()
-        docs: list[Path] = []
-        if files["spec.md"].is_file():
-            active, docs = check_spec(rep, root, files["spec.md"],
-                                      pattern)
-        if files["frd.md"].is_file():
-            check_companion(rep, files["frd.md"], active, "REQ-")
-        if files["nfrd.md"].is_file():
-            check_companion(rep, files["nfrd.md"], active, "NFR-")
-        if files["plan.md"].is_file():
-            check_plan(rep, files["plan.md"], active)
-        if files["tasks.md"].is_file():
-            check_tasks(rep, files["tasks.md"], active)
-        primary = docs[0] if docs else None
-        for path in sorted(package.rglob("*.md")):
-            text = path.read_text(encoding="utf-8")
-            check_anchors(rep, root, path, text, primary)
-            check_mermaid(rep, path)
-            check_links(rep, path)
+        check_package(rep, root, package, require_full, pattern)
     return rep, len(found)
 
 
