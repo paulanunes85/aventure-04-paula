@@ -5,7 +5,7 @@
 - Status: Rascunho
 - Versão: 0.1.0 (2026-09-24)
 - Fontes: SRC-001, SRC-002, SRC-003
-- Constituição: não existe (`.specify/memory/constitution.md` e `CONSTITUTION.md` ausentes em 2026-09-24); governança por `.github/copilot-instructions.md` e `.github/instructions/`
+- Constituição: não existe (`CONSTITUTION.md` ausente em 2026-09-24); governança por `.github/copilot-instructions.md` e `.github/instructions/`
 - Aprovação: PENDENTE (aprovadores "A definir" em `requisitos/requisitos.md#L11`; ver Q-016)
 
 ## Problema e resultado
