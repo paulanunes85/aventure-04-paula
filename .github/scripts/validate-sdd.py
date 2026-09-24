@@ -712,9 +712,8 @@ def check_stages(rep: Report, path: Path, require_full: bool,
     for level, stage in enumerate(STAGES):
         for name in stage:
             if name in texts and name not in produced:
-                rep.add(*stub_finding(level, top, require_full)[:2],
-                        path / name,
-                        stub_finding(level, top, require_full)[2])
+                kind, code, msg = stub_finding(level, top, require_full)
+                rep.add(kind, code, path / name, msg)
     for name, level in CHECKPOINTS.items():
         if top >= level and name not in entries(path / "checkpoints"):
             rep.error("CKP-001", path / "checkpoints" / name,
