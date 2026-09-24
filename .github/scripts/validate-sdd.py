@@ -670,10 +670,14 @@ def reached(produced: set[str]) -> int:
                 if produced & set(stage)), default=-1)
 
 
-def check_layout(rep: Report, path: Path, require_full: bool,
-                 produced: set[str], texts: dict[str, str]) -> None:
+def entries(path: Path) -> set[str]:
+    return {p.name for p in path.iterdir()} if path.is_dir() else set()
+
+
+def check_files(rep: Report, path: Path, texts: dict[str, str]) -> None:
+    names = entries(path)
     for name in LEGACY:
-        if (path / name).is_file():
+        if name in names:
             rep.error("PKG-007", path / name,
                       "nome fora do padrão; use os arquivos em "
                       "MAIÚSCULAS do pacote")
@@ -681,33 +685,43 @@ def check_layout(rep: Report, path: Path, require_full: bool,
         if name not in texts:
             rep.error("PKG-002", path / name, "arquivo obrigatório ausente")
     for folder in FOLDERS:
-        if not (path / folder / INDEX).is_file():
+        if INDEX not in entries(path / folder):
             rep.error("PKG-006", path / folder / INDEX,
                       f"pasta {folder}/ sem índice {INDEX}")
-    top = reached(produced)
-    for level, stage in enumerate(STAGES):
-        stubs = [n for n in stage if n in texts and n not in produced]
-        for name in stubs:
-            if level == 0:
-                rep.error("STG-001", path / name,
-                          "arquivo da etapa de requisitos não iniciado")
-            elif level < top:
-                rep.error("STG-003", path / name,
-                          "não iniciado, mas uma etapa posterior já foi "
-                          "produzida")
-            else:
-                (rep.error if require_full else rep.warn)(
-                    "PKG-003", path / name, "etapa ainda não produzida")
-    for name, level in CHECKPOINTS.items():
-        if top >= level and not (path / "checkpoints" / name).is_file():
-            rep.error("CKP-001", path / "checkpoints" / name,
-                      "checkpoint ausente para a etapa produzida")
-    if top >= 1 and not (path / "contracts" / "manifest.yaml").is_file():
-        rep.error("CTR-001", path / "contracts" / "manifest.yaml",
-                  "manifesto de contratos ausente")
-    extras = {p.name for p in path.glob("*.md")} - set(FILES) - set(LEGACY)
+    extras = {n for n in names if n.endswith(".md")} - set(FILES) \
+        - set(LEGACY)
     for name in sorted(extras):
         rep.warn("PKG-008", path / name, "arquivo fora da estrutura")
+
+
+def stub_finding(level: int, top: int, require_full: bool
+                 ) -> tuple[str, str, str]:
+    if level == 0:
+        return "ERRO", "STG-001", "arquivo da etapa de requisitos não " \
+            "iniciado"
+    if level < top:
+        return "ERRO", "STG-003", "não iniciado, mas uma etapa " \
+            "posterior já foi produzida"
+    return ("ERRO" if require_full else "AVISO"), "PKG-003", \
+        "etapa ainda não produzida"
+
+
+def check_stages(rep: Report, path: Path, require_full: bool,
+                 produced: set[str], texts: dict[str, str]) -> None:
+    top = reached(produced)
+    for level, stage in enumerate(STAGES):
+        for name in stage:
+            if name in texts and name not in produced:
+                rep.add(*stub_finding(level, top, require_full)[:2],
+                        path / name,
+                        stub_finding(level, top, require_full)[2])
+    for name, level in CHECKPOINTS.items():
+        if top >= level and name not in entries(path / "checkpoints"):
+            rep.error("CKP-001", path / "checkpoints" / name,
+                      "checkpoint ausente para a etapa produzida")
+    if top >= 1 and "manifest.yaml" not in entries(path / "contracts"):
+        rep.error("CTR-001", path / "contracts" / "manifest.yaml",
+                  "manifesto de contratos ausente")
 
 
 def check_checkpoints(rep: Report, pkg: Package,
@@ -720,7 +734,7 @@ def check_checkpoints(rep: Report, pkg: Package,
     }
     for name, (ids, pattern) in wanted.items():
         path = pkg.path / "checkpoints" / name
-        if not path.is_file():
+        if name not in entries(path.parent):
             continue
         text = path.read_text(encoding="utf-8")
         feature = FEATURE_ID.search(text)
@@ -732,8 +746,9 @@ def check_checkpoints(rep: Report, pkg: Package,
 
 
 def load_package(root: Path, path: Path) -> Package:
+    names = entries(path)
     texts = {n: (path / n).read_text(encoding="utf-8")
-             for n in FILES if (path / n).is_file()}
+             for n in FILES if n in names}
     produced = {n for n, t in texts.items()
                 if file_status(t) not in (None, "não iniciado")}
     spec = texts.get(SPECIFICATION, "") if SPECIFICATION in produced \
@@ -772,7 +787,8 @@ def check_content(rep: Report, pkg: Package) -> None:
 def check_package(rep: Report, root: Path, path: Path,
                   require_full: bool) -> Package:
     pkg = load_package(root, path)
-    check_layout(rep, path, require_full, pkg.produced, pkg.texts)
+    check_files(rep, path, pkg.texts)
+    check_stages(rep, path, require_full, pkg.produced, pkg.texts)
     check_content(rep, pkg)
     primary = pkg.docs[0] if pkg.docs else None
     for md in sorted(path.rglob("*.md")):
