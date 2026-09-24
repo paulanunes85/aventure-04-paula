@@ -7,8 +7,10 @@ path-shaped inline code such as `.github/hooks/config/policy.json` or
 starts with `./`, `../`, a known root prefix or an existing top-level
 entry, or when it is a bare root file (README.md, CONSTITUTION.md...).
 
-Not current-state claims, therefore skipped: fenced code, unchecked task
-items, paragraphs marked planned/optional/absent, documents whose YAML
+Not current-state claims, therefore skipped: fenced code, regions between
+`<!-- doc-references: off -->` and `<!-- doc-references: on -->`,
+unchecked task items, paragraphs marked planned/optional/absent or
+written as tutorial steps and examples, documents whose YAML
 front matter status is draft/planned/proposed/superseded/archived, the
 `.spec/` tree (it declares future surfaces; use --include-specs for an
 advisory audit) and the agent customizations, whose templates describe
@@ -43,8 +45,11 @@ NON_CURRENT_MARKERS = (
     "[absent]", "[ausente]", "[optional]", "[opcional]", "[planned]",
     "[planejado]", "does not exist", "is absent", "is missing",
     "não existe", "não existem", "ainda não existe", "será criado",
-    "quando existir",
+    "quando existir", "create ", "crie ", "example", "exemplo",
+    "scenario", "cena ", "step ", "passo ",
 )
+IGNORE_START = "<!-- doc-references: off -->"
+IGNORE_END = "<!-- doc-references: on -->"
 NON_CURRENT_STATUSES = {
     "archived", "arquivado", "draft", "rascunho", "planned", "planejado",
     "proposed", "proposto", "superseded", "substituído",
@@ -55,6 +60,7 @@ EXCLUDED_DIRS = {
     "venv",
 }
 EXCLUDED_PREFIXES = (
+    Path(".github/copilot-instructions.md"),
     Path(".github/agents"),
     Path(".github/instructions"),
     Path(".github/prompts"),
@@ -192,15 +198,23 @@ class LineReference:
     requires_executable: bool
 
 
+def prose_lines(text: str) -> Iterator[tuple[int, str]]:
+    """Yield lines outside fenced code and ignore regions."""
+    in_fence = ignored = False
+    for number, line in enumerate(text.splitlines(), start=1):
+        stripped = line.strip()
+        if stripped in (IGNORE_START, IGNORE_END):
+            ignored = stripped == IGNORE_START
+        elif FENCE.match(line):
+            in_fence = not in_fence
+        elif not (in_fence or ignored):
+            yield number, line
+
+
 def current_lines(text: str) -> Iterator[tuple[int, str]]:
     """Yield lines that state current facts (see module docstring)."""
-    in_fence = pending_task = non_current = False
-    for number, line in enumerate(text.splitlines(), start=1):
-        if FENCE.match(line):
-            in_fence = not in_fence
-            continue
-        if in_fence:
-            continue
+    pending_task = non_current = False
+    for number, line in prose_lines(text):
         if not line.strip():
             non_current = False
             continue

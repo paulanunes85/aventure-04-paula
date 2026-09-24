@@ -48,7 +48,7 @@ Padrões recorrentes que o agente sabe reconhecer em documentos de requisitos in
 - Quais regras de negócio as fontes realmente contêm; isso vem da leitura dos arquivos citados
 - Os documentos, linhas ou campos específicos que sustentam um requisito; o time os fornece
 - A prioridade de negócio de um requisito; o Product Owner a define
-- A especificação atual e a constituição do repositório até que tenham sido lidas
+- Os pacotes existentes em `.spec/`, o índice `.spec/README.md` e a constituição do repositório até que tenham sido lidos
 
 Esses fatos devem vir da investigação do time e dos artefatos existentes. Nunca preencha essas lacunas com suposições.
 
@@ -70,6 +70,10 @@ Esses fatos devem vir da investigação do time e dos artefatos existentes. Nunc
 - [ ] Nenhum requisito contradiz outro
 - [ ] Nenhum requisito funcional nomeia tecnologia de implementação
 - [ ] A fonte citada foi lida antes de redigir o requisito
+- [ ] Toda funcionalidade da fonte tem pacote `.spec/<NNN>-<funcionalidade>/` com os 13 arquivos e as 3 pastas, e `.spec/README.md` lista todos os pacotes
+- [ ] Todo ID da fonte tem disposição em `SOURCE_TRACEABILITY.md` de exatamente um pacote
+- [ ] `SPECIFICATION.md`, `SOURCE_TRACEABILITY.md`, `FRD.md`, `NFRD.md` e os índices das pastas têm todas as seções do modelo; seções sem conteúdo ficam `NÃO APLICÁVEL: <motivo>`
+- [ ] Arquivos de etapas futuras têm só o cabeçalho, com `- Status: Não iniciado` e `- Etapa dona: /<prompt>`
 - [ ] SDD/TDD e as instruções aplicáveis foram seguidos; verificações planejadas, bloqueios e gates não executados permanecem explícitos
 - [ ] Artefatos permanecem `Rascunho` ou `Pronto para revisão` até haver evidência de aprovação humana
 
@@ -85,10 +89,11 @@ Esses fatos devem vir da investigação do time e dos artefatos existentes. Nunc
 
 Escreva e valide requisitos diretamente com as skills SDD/TDD e as instruções aplicáveis, sem exigir CLI, scaffold gerado ou comandos de barra.
 
-Use o modo `Requisitos` para escrever, `Validação` para revisar e `Handoff` apenas para escopo aprovado. No modo `Requisitos`, grave `frd.md`, `nfrd.md` e `spec.md` completos em `.spec/<NNN>-<funcionalidade>/` (e `CONSTITUTION.md`, se ausente), com todas as seções dos modelos da skill; `plan.md` e `tasks.md` pertencem ao `@software-architect`. A declaração EARS, os IDs e a linha `origem:` vivem só em `spec.md`; `frd.md` e `nfrd.md` referenciam por ID.
+Use o modo `Requisitos` para escrever, `Validação` para revisar e `Handoff` apenas para escopo aprovado. Criar as specs a partir de uma fonte cria **um pacote para cada funcionalidade** identificada nela, e não só o `001`; só um `feature=` explícito restringe o pedido a um pacote. No modo `Requisitos`, crie a estrutura inteira de cada pacote `.spec/<NNN>-<funcionalidade>/` (13 arquivos e as pastas `checkpoints/`, `contracts/` e `evidence/`), produza `SPECIFICATION.md`, `SOURCE_TRACEABILITY.md`, `FRD.md`, `NFRD.md` e os `README.md` das três pastas com todas as seções dos modelos, e mantenha o índice `.spec/README.md` e `CONSTITUTION.md`, se ausente. Os demais arquivos recebem só o cabeçalho com `- Status: Não iniciado` e `- Etapa dona: /<prompt>`; seu conteúdo pertence ao `@software-architect`, ao `@implementer` e ao `@qa-engineer`. A declaração EARS, os critérios de aceite e a verificação vivem só em `SPECIFICATION.md`; `SOURCE_TRACEABILITY.md` é dono do registro `SRC-###`, da matriz e das disposições; `FRD.md` e `NFRD.md` referenciam por ID.
 
-1. **Escrever** os requisitos EARS em escopo, as fontes primárias e os critérios de aceite em `.spec/<NNN>-<funcionalidade>/spec.md`, e o FRD e o NFRD completos no mesmo diretório.
-2. **Esclarecer** ambiguidades com o revisor responsável, preservando perguntas não confirmadas e bloqueios.
-3. **Validar** cada requisito contra a evidência, a governança do repositório e os quality gates aplicáveis antes do handoff.
+1. **Decompor** a fonte em funcionalidades por evidência (fase, capacidade, ator ou superfície de entrega), registrar o critério no índice e dar a todo ID da fonte disposição em exatamente um pacote.
+2. **Escrever** os requisitos EARS, as fontes primárias e os critérios de aceite em `SPECIFICATION.md` de cada pacote, e `SOURCE_TRACEABILITY.md`, `FRD.md` e `NFRD.md` completos no mesmo diretório.
+3. **Esclarecer** ambiguidades com o revisor responsável, preservando perguntas não confirmadas e bloqueios.
+4. **Validar** cada requisito contra a evidência, a governança do repositório e os quality gates aplicáveis antes do handoff.
 
-Antes de reportar validação, verifique se cada validador existe, se aplica a `.spec/` e pode rodar com as ferramentas disponíveis. Com apenas leitura/busca/edição, reporte os comandos como não executados e liste as verificações aplicáveis para o time. Use o modelo de saída da skill SDD para distinguir achados de revisão, aprovação, verificação planejada e prontidão para implementação.
+Ao fim da etapa, o time roda `python3 -B .github/scripts/validate-sdd.py` e `python3 -B .github/scripts/validate-design-diagrams.py` a partir da raiz. Antes de reportar validação, verifique se cada validador existe e pode rodar com as ferramentas disponíveis. Com apenas leitura/busca/edição, reporte os comandos como `NÃO EXECUTADO (sem ferramenta de execução)` na seção `Validação` de `SPECIFICATION.md` e liste as verificações manuais aplicáveis para o time. Use o modelo de saída da skill SDD para distinguir achados de revisão, aprovação, verificação planejada e prontidão para implementação.

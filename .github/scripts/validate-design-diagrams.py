@@ -37,7 +37,7 @@ PALETTE = (
     "classDef zone fill:#F2F2F2,stroke:#999999,color:#222222",
     "classDef external fill:#E8E8E8,stroke:#555555,color:#222222",
 )
-PACKAGE_FILES = {"spec.md", "plan.md", "tasks.md", "frd.md", "nfrd.md"}
+PACKAGE = re.compile(r"^\d{3}-[a-z0-9]+(?:-[a-z0-9]+)*$")
 DEFAULT_ROOTS = (
     ROOT / ".spec",
     GITHUB_ROOT / "skills",
@@ -65,13 +65,14 @@ def diagram_kind(body: str) -> str:
 
 
 def canonical_graph_artifact(path: pathlib.Path) -> bool:
-    if path.name in PACKAGE_FILES and path.parent.parent.name == ".spec":
-        return True
     try:
-        relative = path.resolve().relative_to(GITHUB_ROOT)
+        parts = path.resolve().relative_to(ROOT).parts
     except ValueError:
         return False
-    return relative.parts[0] in {"skills", "agents", "prompts", "instructions"}
+    if len(parts) > 2 and parts[0] == ".spec" and PACKAGE.match(parts[1]):
+        return True
+    return (len(parts) > 2 and parts[0] == ".github"
+            and parts[1] in {"skills", "agents", "prompts", "instructions"})
 
 
 def block_matches(text: str) -> list[re.Match[str]]:
