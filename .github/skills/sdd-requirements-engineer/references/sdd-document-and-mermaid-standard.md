@@ -7,13 +7,23 @@ Use este contrato para o pacote canônico de artefatos e decisões de apoio. As 
 | Artefato | Responsabilidade obrigatória |
 | --- | --- |
 | `CONSTITUTION.md` | Princípios `CON-NNN` com fonte, governança e emenda; reutilize a constituição existente quando houver |
-| `frd.md` | Escopo funcional, atores, domínio e ciclo de vida, requisitos por domínio (por ID), interações externas, incrementos e revisão |
-| `nfrd.md` | Aplicabilidade de categorias, contextos e envelopes de medição, segurança, conformidade, restrições tecnológicas e revisão |
-| `spec.md` | Requisitos EARS canônicos, `origem:`, aceite, registro de fontes, matriz, premissas, escopo, aprovação e decisões em aberto |
-| `plan.md` | Análise, portfólio de design completo, decisões ou links para ADRs, riscos, estratégia de testes e rastreabilidade requisito-componente |
-| `tasks.md` | Ordem de dependências, mapa de testes, checkboxes, checklist, análise cruzada, verificação, gate de conclusão, comandos determinísticos e evidências datadas |
+| `.spec/README.md` | Índice de funcionalidades, critério de corte, IDs da fonte por pacote e dependências |
+| `SPECIFICATION.md` | Requisitos EARS canônicos, `origem:`, aceite, premissas, escopo, validação e aprovação |
+| `SOURCE_TRACEABILITY.md` | Registro `SRC-###`, matriz, cobertura da fonte e disposições históricas |
+| `FRD.md` | Escopo funcional, atores, domínio e ciclo de vida, requisitos por domínio (por ID), interações externas, incrementos e revisão |
+| `NFRD.md` | Aplicabilidade de categorias, contextos e envelopes de medição, segurança, conformidade, restrições tecnológicas e revisão |
+| `ANALYSIS.md` | Evidências, lacunas, opções e riscos |
+| `DESIGN.md` | Portfólio de design completo e rastreabilidade requisito-componente |
+| `DECISIONS.md` | Decisões `DEC-NNN` e ADRs vinculados |
+| `TASKS.md` | Ordem de dependências, checkboxes, grafo, gate de conclusão e registro de execução |
+| `TESTING.md` | Estratégia, ambientes, catálogo, mapa e cobertura de testes |
+| `TDD.md` | Ciclo RED/GREEN/REFACTOR por critério de aceite |
+| `CHECKLIST.md` | Gates de revisão, implementação, verificação e release |
+| `CROSS_ANALYSIS.md` | Consistência entre todos os arquivos e análise de órfãos |
+| `VERIFICATION.md` | Verificações planejadas, execuções de validadores e resultados |
+| `checkpoints/`, `contracts/`, `evidence/` | Mapas legíveis por máquina, contratos de interface com `manifest.yaml` e evidências datadas, cada pasta com `README.md` |
 | `CODEMAP.md` | Módulos, fluxo de dados, integrações e cobertura de REQ-IDs |
-| ADRs e artefatos adicionais | ADR para decisão estrutural; planos ou manifestos separados apenas quando justificados, vinculados a partir do artefato dono |
+| ADRs | Decisão estrutural ou nova dependência que exige aprovação humana |
 
 ## Tema Mermaid universal
 
@@ -44,7 +54,7 @@ Mantenha os diagramas revisáveis:
 
 ## Portfólio de design
 
-`plan.md` sempre inclui, nesta ordem:
+`DESIGN.md` sempre cobre, nesta ordem:
 
 1. Visão geral da arquitetura
 2. Contexto do sistema
@@ -76,14 +86,14 @@ Use uma entrada de checkbox por tarefa:
 ```
 
 - `[S]` significa sequencial; `[P]` significa independente em dependências e superfície de mudança.
-- O DAG de dependências contém cada tarefa exatamente uma vez.
-- O mapa de testes nomeia os requisitos governantes e os testes planejados ou executados.
-- `[x]` só é permitido quando a tarefa aparece no registro datado `Marcadas como concluídas pela verificação:` e sua evidência de aceite existe.
+- O DAG de dependências em `TASKS.md` e `checkpoints/plan-to-tasks.yaml` contêm cada tarefa exatamente uma vez.
+- O mapa de testes em `TESTING.md` nomeia os requisitos governantes e os testes planejados ou executados.
+- `[x]` só é permitido quando a tarefa aparece no registro datado `Marcadas como concluídas pela verificação:` e sua evidência de aceite existe em `evidence/`.
 - Código parcial existente permanece desmarcado até que o sinal de aceite completo seja demonstrado.
 
 ## Validação exigida
 
-Execute os validadores da seção `Verificações executáveis` das [instruções de artefatos](../../../instructions/sdd-artifacts.instructions.md) (`.github/scripts/validate-sdd.py` e `.github/scripts/validate-design-diagrams.py`) e registre comando, data e resultado em `tasks.md` ou na seção `Validação` de `spec.md`. Sem ferramenta de execução, faça a verificação manual descrita ali e registre os validadores como não executados.
+Execute os validadores da seção `Verificações executáveis` das [instruções de artefatos](../../../instructions/sdd-artifacts.instructions.md) (`.github/scripts/validate-sdd.py` e `.github/scripts/validate-design-diagrams.py`) e registre comando, data e resultado em `VERIFICATION.md` (ou na seção `Validação` de `SPECIFICATION.md` antes da etapa de tarefas), com a saída salva em `evidence/`. Sem ferramenta de execução, faça a verificação manual descrita ali e registre os validadores como não executados.
 
 Validadores textuais não provam correção EARS, precisão de linhas de fonte, sintaxe de diagramas, aprovação ou testes de produto passando. Revise esses pontos separadamente. Renderize os diagramas aplicáveis com um renderizador disponível (por exemplo, `npx @mermaid-js/mermaid-cli`) e registre o resultado; se nenhum estiver disponível, reporte a renderização como não executada.
 

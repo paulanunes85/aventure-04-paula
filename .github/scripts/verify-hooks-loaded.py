@@ -79,11 +79,13 @@ def strip_jsonc(text: str) -> str:
             end = text.find("*/", i + 2)
             i = len(text) if end < 0 else end + 2
         else:
-            if not (char == ","
-                    and text[i + 1:].lstrip()[:1] in ("}", "]")):
-                out.append(char)
+            out.append("" if is_trailing_comma(text, i) else char)
             i += 1
     return "".join(out)
+
+
+def is_trailing_comma(text: str, i: int) -> bool:
+    return text[i] == "," and text[i + 1:].lstrip()[:1] in ("}", "]")
 
 
 def read_json(path: Path, rep: Report, jsonc: bool = False) -> Any:

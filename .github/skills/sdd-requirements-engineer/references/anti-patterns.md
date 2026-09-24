@@ -26,7 +26,9 @@ Use este catálogo durante correção e validação. Corrija o defeito subjacent
 | Status `Aprovado` pré-preenchido | O artefato declara uma revisão que não ocorreu. | Comece como `Rascunho` ou `Pronto para revisão`; vincule a evidência de aprovação depois. |
 | Design-first sem requisitos recuperados | Escolhas de arquitetura viram a fonte de verdade sem revisão. | Derive e revise requisitos antes do handoff. |
 | Constituição local conflita com a governança do repositório | Duas autoridades podem impor regras incompatíveis. | Reutilize a constituição do repositório ou registre uma emenda explícita. |
-| Texto completo do requisito copiado em todos os artefatos | Cópias divergem e criam várias fontes normativas. | Mantenha a declaração canônica em `spec.md` e referencie por ID estável em `frd.md`, `nfrd.md`, `plan.md` e `tasks.md`. |
+| Texto completo do requisito copiado em todos os artefatos | Cópias divergem e criam várias fontes normativas. | Mantenha a declaração canônica em `SPECIFICATION.md` e referencie por ID estável nos demais arquivos do pacote. |
+| Só o primeiro pacote criado | Funcionalidades inteiras da fonte somem sem disposição. | Crie um pacote por funcionalidade e atribua cada ID da fonte a um pacote no índice. |
+| Arquivo ou pasta da estrutura ausente | Revisores e o validador não distinguem etapa pendente de esquecimento. | Crie a estrutura inteira; arquivos de etapas futuras ficam `Não iniciado`. |
 | Seção do modelo omitida | O revisor não distingue "não se aplica" de "esquecido". | Mantenha a seção com `NÃO APLICÁVEL: <motivo>`, `PENDENTE` ou `BLOQUEADO`. |
 | Seção preenchida para parecer completa | Completude vira ficção e esconde lacunas reais. | Use apenas conteúdo com fonte; o resto fica `NÃO APLICÁVEL` ou bloqueio visível. |
 | Especificação fora de `.spec/` | Hooks, prompts e revisores não encontram o pacote. | Mova o pacote para `.spec/<NNN>-<funcionalidade>/`. |

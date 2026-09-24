@@ -1,19 +1,16 @@
 # Modelo de Documento de Requisitos Não Funcionais (NFRD)
 
-Grave este modelo completo em `.spec/<NNN>-<funcionalidade>/nfrd.md`. Todas as seções são obrigatórias; seções sem conteúdo ficam `NÃO APLICÁVEL: <motivo>`. A declaração EARS, o aceite e a verificação de cada NFR vivem apenas em [spec.md](./spec-templates.md#specification-specmd); o NFRD é dono da aplicabilidade, dos contextos e do envelope de medição de cada ID. Nunca preencha uma meta com um padrão "de mercado" quando evidência de carga, política ou um responsável não a forneceu.
+Grave este modelo completo em `.spec/<NNN>-<funcionalidade>/NFRD.md`. Todas as seções são obrigatórias; seções sem conteúdo ficam `NÃO APLICÁVEL: <motivo>`. A declaração EARS, o aceite e a verificação de cada NFR vivem apenas em `SPECIFICATION.md` ([modelo](./spec-templates.md#specification-specificationmd)); o NFRD é dono da aplicabilidade, dos contextos e do envelope de medição de cada ID. Nunca preencha uma meta com um padrão "de mercado" quando evidência de carga, política ou um responsável não a forneceu.
 
 ```markdown
----
-title: "Documento de Requisitos Não Funcionais: <Projeto ou Funcionalidade>"
-description: "Restrições de qualidade mensuráveis e envelopes de verificação."
-date: "<AAAA-MM-DD>"
-version: "0.1.0"
-status: "Rascunho"
-companion_frd: "frd.md"
-spec: "spec.md"
----
+# NFRD: <Funcionalidade>
 
-# Documento de Requisitos Não Funcionais: <Projeto ou Funcionalidade>
+- Funcionalidade: <NNN>-<slug>
+- Status: Rascunho
+- Etapa dona: /write-ears-spec
+- Data: <AAAA-MM-DD>
+- Versão: 0.1.0
+- Documentos irmãos: [SPECIFICATION.md](SPECIFICATION.md), [FRD.md](FRD.md)
 
 ## 1. Controle do documento
 
@@ -50,7 +47,7 @@ spec: "spec.md"
 
 ### NFR-001: <Título curto>
 
-- Declaração canônica, aceite e verificação: [spec.md](spec.md) `NFR-001` (não copie a declaração aqui)
+- Declaração canônica, aceite e verificação: [SPECIFICATION.md](SPECIFICATION.md) `NFR-001` (não copie a declaração aqui)
 - Categoria: <categoria>
 - Justificativa: <por que a restrição é necessária>
 - Aplica-se a: <contextos>
@@ -116,7 +113,7 @@ spec: "spec.md"
 - Segurança identifica autenticação, autorização, proteção e comportamento em falha quando aplicável.
 - Conformidade é explicitamente aplicável, não aplicável ou bloqueada; nunca é suposta em silêncio.
 - Restrições tecnológicas têm evidência e gatilho de revisão.
-- Todo `NFR-NNN` ativo de `spec.md` aparece na seção 4 e no resumo, e nenhuma declaração EARS foi copiada.
+- Todo `NFR-NNN` ativo de `SPECIFICATION.md` aparece na seção 4 e no resumo, e nenhuma declaração EARS foi copiada.
 - Toda seção está presente; seções sem conteúdo declaram `NÃO APLICÁVEL` com motivo.
 - Termos vagos ("rápido", "seguro", "pronto para produção", "intuitivo") foram convertidos em envelopes de medição ou bloqueios.
 - O status de aprovação não vem preenchido.

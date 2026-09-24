@@ -2,7 +2,7 @@
 
 Aplique toda verificação relevante. Marque cada uma como `APROVADO`, `REPROVADO`, `BLOQUEADO` ou `NÃO APLICÁVEL` e cite o artefato, ID de requisito, ID de fonte ou evidência usada. Um pacote só passa quando nenhuma verificação aplicável está reprovada ou bloqueada.
 
-Os nomes em maiúsculas (`SPECIFICATION`, `DESIGN`, `TASKS` etc.) identificam responsabilidades descritas nos [modelos de artefatos](spec-templates.md). Elas vivem em `.spec/<NNN>-<funcionalidade>/frd.md`, `nfrd.md`, `spec.md`, `plan.md` e `tasks.md`, conforme a política de artefatos.
+Os nomes em maiúsculas (`SPECIFICATION`, `DESIGN`, `TASKS` etc.) identificam os arquivos do pacote descritos nos [modelos de artefatos](spec-templates.md): `.spec/<NNN>-<funcionalidade>/SPECIFICATION.md`, `DESIGN.md`, `TASKS.md` e assim por diante.
 
 ## G1. Escopo e evidência
 
@@ -72,7 +72,10 @@ Os nomes em maiúsculas (`SPECIFICATION`, `DESIGN`, `TASKS` etc.) identificam re
 - [ ] G5.11 Todo tipo de Mermaid usa o tema claro universal; diagramas tipo grafo carregam as classes canônicas default/zone/external e tipos não estilizáveis não contêm `classDef`.
 - [ ] G5.12 O design inclui uma visão de entrega que mapeia requisitos por componentes, tarefas/plano, dependências, testes/evidências e estado atual versus alvo.
 - [ ] G5.13 Toda tarefa tem checkbox, marcador de sequência, mapeamento de plano, rastreio de requisito e superfície de mudança; o DAG cobre todas as tarefas e as tarefas marcadas correspondem ao registro de verificação.
-- [ ] G5.14 `frd.md` e `nfrd.md` referenciam os IDs de `spec.md` sem copiar nem redefinir declarações EARS, e seus resumos e contagens concordam com `spec.md`.
+- [ ] G5.14 `FRD.md` e `NFRD.md` referenciam os IDs de `SPECIFICATION.md` sem copiar nem redefinir declarações EARS, e seus resumos e contagens concordam com `SPECIFICATION.md`.
+- [ ] G5.15 Todo pacote tem os 13 arquivos e as 3 pastas com `README.md`; arquivos de etapas futuras estão `Não iniciado` e nenhum fica `Não iniciado` depois que uma etapa posterior começa.
+- [ ] G5.16 Toda funcionalidade da fonte tem pacote, todo ID da fonte tem disposição em exatamente um pacote e o índice `.spec/README.md` lista todos os pacotes.
+- [ ] G5.17 Checkpoints repetem o número do pacote e contêm todo ID ativo e toda tarefa; `contracts/manifest.yaml` declara cada contrato ou `nao-aplicavel` com motivo; toda evidência citada existe em `evidence/`.
 
 ## G6. Rastreabilidade e ciclo de vida
 

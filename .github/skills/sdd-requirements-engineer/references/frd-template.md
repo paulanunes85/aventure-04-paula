@@ -1,20 +1,17 @@
 # Modelo de Documento de Requisitos Funcionais (FRD)
 
-Grave este modelo completo em `.spec/<NNN>-<funcionalidade>/frd.md` após a análise de lacunas. Todas as seções são obrigatórias; seções sem conteúdo ficam `NÃO APLICÁVEL: <motivo>`. A declaração EARS, o aceite e a verificação de cada requisito vivem apenas em [spec.md](./spec-templates.md#specification-specmd); o FRD referencia os IDs e acrescenta domínio, atores, justificativa, dependências e falha e recuperação. Mantenha o documento como `Rascunho` ou `Pronto para revisão` até um revisor responsável registrar a aprovação.
+Grave este modelo completo em `.spec/<NNN>-<funcionalidade>/FRD.md` após a análise de lacunas. Todas as seções são obrigatórias; seções sem conteúdo ficam `NÃO APLICÁVEL: <motivo>`. A declaração EARS, o aceite e a verificação de cada requisito vivem apenas em `SPECIFICATION.md` ([modelo](./spec-templates.md#specification-specificationmd)); o FRD referencia os IDs e acrescenta domínio, atores, justificativa, dependências e falha e recuperação. Mantenha o documento como `Rascunho` ou `Pronto para revisão` até um revisor responsável registrar a aprovação.
 
 ```markdown
----
-title: "Documento de Requisitos Funcionais: <Projeto ou Funcionalidade>"
-description: "Escopo funcional e comportamento observável, neutros quanto à implementação."
-date: "<AAAA-MM-DD>"
-version: "0.1.0"
-status: "Rascunho"
-project_context: "<greenfield|brownfield|modernização|migração|api|mobile|dados|saas|ferramenta-interna|cli|educacional|infraestrutura>"
-companion_nfrd: "nfrd.md"
-spec: "spec.md"
----
+# FRD: <Funcionalidade>
 
-# Documento de Requisitos Funcionais: <Projeto ou Funcionalidade>
+- Funcionalidade: <NNN>-<slug>
+- Status: Rascunho
+- Etapa dona: /write-ears-spec
+- Data: <AAAA-MM-DD>
+- Versão: 0.1.0
+- Contexto do projeto: <greenfield|brownfield|modernização|migração|api|mobile|dados|saas|ferramenta-interna|cli|educacional|infraestrutura>
+- Documentos irmãos: [SPECIFICATION.md](SPECIFICATION.md), [NFRD.md](NFRD.md)
 
 ## 1. Controle do documento
 
@@ -71,7 +68,7 @@ spec: "spec.md"
 
 ## 6. Requisitos funcionais por domínio
 
-A declaração EARS canônica, o aceite e a verificação de cada ID estão em [spec.md](spec.md). Não copie nem reescreva a declaração aqui.
+A declaração EARS canônica, o aceite e a verificação de cada ID estão em [SPECIFICATION.md](SPECIFICATION.md). Não copie nem reescreva a declaração aqui.
 
 ### Domínio: <nome do domínio>
 
@@ -124,8 +121,8 @@ A declaração EARS canônica, o aceite e a verificação de cada ID estão em [
 - Todo requisito P0 tem justificativa de impacto na entrega.
 - Comportamento de erro e recuperação está explícito para cada ação principal.
 - Requisitos permanecem neutros quanto à implementação e atômicos.
-- As linhas do resumo correspondem exatamente aos registros normativos de `spec.md` (IDs, padrão, prioridade, fonte e status).
-- Todo `REQ-NNN` ativo de `spec.md` aparece na seção 6 e no resumo, e nenhuma declaração EARS foi copiada.
+- As linhas do resumo correspondem exatamente aos registros normativos de `SPECIFICATION.md` (IDs, padrão, prioridade, fonte e status).
+- Todo `REQ-NNN` ativo de `SPECIFICATION.md` aparece na seção 6 e no resumo, e nenhuma declaração EARS foi copiada.
 - Toda seção está presente; seções sem conteúdo declaram `NÃO APLICÁVEL` com motivo.
 - IDs removidos têm disposição registrada, mesmo que o motivo seja "desconhecido".
 - O status de aprovação não vem preenchido.
